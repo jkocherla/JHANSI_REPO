@@ -1,0 +1,2549 @@
+{
+  "swagger" : "2.0",
+  "info" : {
+    "description" : "RESTful webservice to enable integration from commerce platform to backend ERP system for given scoped global function",
+    "version" : "1.0.0",
+    "title" : "websitesvc",
+    "contact" : {
+      "name" : "pjain2",
+      "email" : "pjain2@pjain2.com"
+    }
+  },
+  "basePath" : "/websitesvc_find/v1",
+  "schemes" : [ "https", "http" ],
+  "security" : [ {
+    "basicAuth" : [ ]
+  } ],
+  "paths" : {
+    "/getInventory" : {
+      "post" : {
+        "description" : "Stock information per location for given regional part number",
+        "operationId" : "postGetInventory",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "body",
+          "description" : "input data for inventory check",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/inventoryInput"
+          }
+        }, {
+          "name" : "X-Request-ID",
+          "in" : "header",
+          "description" : "unique system generated id",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "X-User-ID",
+          "in" : "header",
+          "description" : "unique user id",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "X-Instance-ID",
+          "in" : "header",
+          "description" : "unique source system instance id",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "The operation was successful.",
+            "schema" : {
+              "$ref" : "#/definitions/inventoryOutput"
+            }
+          },
+          "500" : {
+            "description" : "Internal Server Error. The server encountered an unexpected condition which prevented it from fulfilling the request",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/getSalesOrder" : {
+      "post" : {
+        "description" : "Get Detail Sales Order information for given regional order number",
+        "operationId" : "postGetSalesOrder",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "body",
+          "description" : "input regional sales order key information",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/getSalesOrderInput"
+          }
+        }, {
+          "name" : "X-Request-ID",
+          "in" : "header",
+          "description" : "unique system generated id",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "X-User-ID",
+          "in" : "header",
+          "description" : "unique user id",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "X-Instance-ID",
+          "in" : "header",
+          "description" : "unique source system instance id",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "The operation was successful.",
+            "schema" : {
+              "$ref" : "#/definitions/getSalesOrderOutput"
+            }
+          },
+          "500" : {
+            "description" : "Internal Server Error. The server encountered an unexpected condition which prevented it from fulfilling the request",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/searchSalesOrder" : {
+      "post" : {
+        "description" : "Search list of sales orders for given criteria",
+        "operationId" : "postSearchSalesOrder",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "body",
+          "description" : "input data to perform sales order search",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/searchSalesOrderInput"
+          }
+        }, {
+          "name" : "X-Request-ID",
+          "in" : "header",
+          "description" : "unique system generated id",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "X-User-ID",
+          "in" : "header",
+          "description" : "unique user id",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "X-Instance-ID",
+          "in" : "header",
+          "description" : "unique source system instance id",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "The operation was successful.",
+            "schema" : {
+              "$ref" : "#/definitions/searchSalesOrderOutput"
+            }
+          },
+          "500" : {
+            "description" : "Internal Server Error. The server encountered an unexpected condition which prevented it from fulfilling the request",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/createSalesOrder" : {
+      "post" : {
+        "description" : "Create Sales Order in regional ERP ",
+        "operationId" : "postCreateOrder",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "body",
+          "description" : "input data consists of Sales Order header and Sales Order details to create order in ERP",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/createSalesOrderInput"
+          }
+        }, {
+          "name" : "X-Request-ID",
+          "in" : "header",
+          "description" : "unique system generated id",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "X-User-ID",
+          "in" : "header",
+          "description" : "unique user id",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "X-Instance-ID",
+          "in" : "header",
+          "description" : "unique source system instance id",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "The operation was successful.",
+            "schema" : {
+              "$ref" : "#/definitions/createSalesOrderOutput"
+            }
+          },
+          "500" : {
+            "description" : "Internal Server Error. The server encountered an unexpected condition which prevented it from fulfilling the request",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/userRegistration" : {
+      "post" : {
+        "description" : "Create new website user in CRM system as new Lead/Opportunity",
+        "operationId" : "postUserRegistration",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "body",
+          "description" : "input data to create new lead",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/userRegistrationInput"
+          }
+        }, {
+          "name" : "X-Request-ID",
+          "in" : "header",
+          "description" : "unique system generated id",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "X-User-ID",
+          "in" : "header",
+          "description" : "unique user id",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "X-Instance-ID",
+          "in" : "header",
+          "description" : "unique source system instance id",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "The operation was successful.",
+            "schema" : {
+              "$ref" : "#/definitions/userRegistrationOutput"
+            }
+          },
+          "500" : {
+            "description" : "Internal Server Error. The server encountered an unexpected condition which prevented it from fulfilling the request",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/findUs" : {
+      "post" : {
+        "operationId" : "postFindUs",
+        "responses" : {
+          "200" : {
+            "description" : "The operation was successful."
+          }
+        },
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "description" : "Insert a findUs",
+        "parameters" : [ {
+          "name" : "body",
+          "in" : "body",
+          "schema" : {
+            "$ref" : "#/definitions/findUs"
+          },
+          "description" : "The request body for the operation",
+          "required" : true
+        } ]
+      }
+    }
+  },
+  "securityDefinitions" : {
+    "basicAuth" : {
+      "type" : "basic"
+    }
+  },
+  "definitions" : {
+    "taxServiceInput" : {
+      "type" : "object",
+      "properties" : {
+        "e1AccountNumber" : {
+          "type" : "string",
+          "example" : "110854",
+          "description" : "E1 account number managed by DMS"
+        },
+        "companyInfo" : {
+          "$ref" : "#/definitions/CompanyInfo"
+        },
+        "orderTypes" : {
+          "$ref" : "#/definitions/taxServiceInput_orderTypes"
+        },
+        "branchPlant" : {
+          "$ref" : "#/definitions/taxServiceInput_branchPlant"
+        },
+        "shipToAddress" : {
+          "$ref" : "#/definitions/taxServiceInput_shipToAddress"
+        },
+        "billToAddress" : {
+          "$ref" : "#/definitions/AddressInfo"
+        },
+        "lineInventoryInfo" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Inventory"
+          }
+        }
+      },
+      "example" : [ {
+        "e1AccountNumber" : 110854,
+        "companyInfo" : {
+          "externalCompanyNo" : 10151,
+          "externalCompanyName" : "Interface USA"
+        },
+        "orderTypes" : {
+          "orderType" : "MATERIAL",
+          "tempOrderType" : "Shipping"
+        },
+        "shipToAddress" : {
+          "address1" : "239 harlech way test",
+          "city" : "charleston",
+          "state" : "US_SC",
+          "zipCode" : "29414",
+          "country" : "US"
+        },
+        "lineInventoryInfo" : [ {
+          "quantity" : "1",
+          "currency" : "USD",
+          "pricePerUnit" : "61.99",
+          "sku" : {
+            "itemNumber" : "7921007999G15S001"
+          }
+        }, {
+          "quantity" : "1",
+          "currency" : "USD",
+          "pricePerUnit" : "10.20",
+          "sku" : {
+            "itemNumber" : "A02001A001AA000"
+          }
+        } ]
+      }, {
+        "e1AccountNumber" : 110854,
+        "companyInfo" : {
+          "externalCompanyNo" : 10151,
+          "externalCompanyName" : "Interface USA"
+        },
+        "orderTypes" : {
+          "orderType" : "MATERIAL",
+          "tempOrderType" : "Sales"
+        },
+        "shipToAddress" : {
+          "address1" : "239 harlech way test",
+          "city" : "charleston",
+          "state" : "US_SC",
+          "zipCode" : "29414",
+          "country" : "US"
+        },
+        "lineInventoryInfo" : [ {
+          "quantity" : "17.90",
+          "currency" : "USD",
+          "pricePerUnit" : "11.99",
+          "sku" : {
+            "itemNumber" : "7921007999G15S001"
+          }
+        }, {
+          "quantity" : "26.94",
+          "currency" : "USD",
+          "pricePerUnit" : "7.88",
+          "sku" : {
+            "itemNumber" : "A02001A001AA000"
+          }
+        } ]
+      } ]
+    },
+    "taxServiceOutput" : {
+      "type" : "object",
+      "properties" : {
+        "companyDetails" : {
+          "$ref" : "#/definitions/CompanyInfo"
+        },
+        "orderTypeDetails" : {
+          "$ref" : "#/definitions/taxServiceOutput_orderTypeDetails"
+        },
+        "lineTaxInformation" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/taxServiceOutput_lineTaxInformation"
+          }
+        }
+      },
+      "example" : [ {
+        "lineTaxInformation" : {
+          "taxInformation" : [ {
+            "inventory" : {
+              "quantity" : 1,
+              "sku" : {
+                "itemNumber" : "M005"
+              },
+              "pricePerUnit" : "61.99"
+            },
+            "taxCalculated" : "0.0",
+            "taxRate" : "0.0"
+          }, {
+            "inventory" : {
+              "quantity" : 1,
+              "sku" : {
+                "itemNumber" : "M005"
+              },
+              "pricePerUnit" : "10.20"
+            },
+            "taxCalculated" : "0.0",
+            "taxRate" : "0.0"
+          } ]
+        }
+      }, {
+        "lineTaxInformation" : {
+          "taxInformation" : [ {
+            "inventory" : {
+              "quantity" : 17.9,
+              "sku" : {
+                "itemNumber" : "7921007999G15S001"
+              },
+              "pricePerUnit" : "11.99"
+            },
+            "taxCalculated" : "0.0",
+            "taxRate" : "0.0"
+          }, {
+            "inventory" : {
+              "quantity" : 26.94,
+              "sku" : {
+                "itemNumber" : "A02001A001AA000"
+              },
+              "pricePerUnit" : "7.88"
+            },
+            "taxCalculated" : "0.0",
+            "taxRate" : "0.0"
+          } ]
+        }
+      } ]
+    },
+    "inventoryInput" : {
+      "type" : "object",
+      "required" : [ "branch", "sku" ],
+      "properties" : {
+        "sku" : {
+          "$ref" : "#/definitions/inventoryInput_sku"
+        },
+        "branch" : {
+          "$ref" : "#/definitions/inventoryInput_branch"
+        }
+      },
+      "example" : {
+        "sku" : {
+          "itemNumber" : "A00601025020202XX0",
+          "uom" : "FTK"
+        },
+        "branch" : {
+          "id" : 10151
+        }
+      }
+    },
+    "inventoryOutput" : {
+      "type" : "object",
+      "properties" : {
+        "inventory" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/inventoryOutput_inventory"
+          }
+        }
+      },
+      "example" : {
+        "itemNumber" : "A00601025020202XX0",
+        "storeNumber" : 10151,
+        "storeName" : "INTERFACE USA",
+        "UOM" : "FTK",
+        "itemTotalQty" : "33939.5010",
+        "inventoryDetails" : [ {
+          "dyelotkey" : "DYELOT_QTY",
+          "dyelotQnty" : "170707_2051.1422"
+        }, {
+          "dyelotkey" : "DYELOT_QTY",
+          "dyelotQnty" : "170620_13616.464"
+        }, {
+          "dyelotkey" : "DYELOT_QTY",
+          "dyelotQnty" : "170708_18271.8948"
+        } ]
+      }
+    },
+    "getSalesOrderInput" : {
+      "type" : "object",
+      "properties" : {
+        "salesOrderHeader" : {
+          "$ref" : "#/definitions/getSalesOrderInput_salesOrderHeader"
+        }
+      },
+      "example" : {
+        "salesOrderHeader" : {
+          "orderIdentifier" : {
+            "webDisplayableE1OrderNumber" : "1235401-SO"
+          },
+          "companyInfo" : {
+            "externalCompanyNo" : 10151
+          },
+          "orderType" : {
+            "orderType" : "MATERIAL",
+            "e1OrderType" : "SO"
+          },
+          "customer" : {
+            "customerType" : "EMPLOYEE",
+            "accountInfo" : {
+              "e1AccountNumber" : 186830
+            }
+          }
+        }
+      }
+    },
+    "getSalesOrderOutput" : {
+      "type" : "object",
+      "required" : [ "salesOrder" ],
+      "properties" : {
+        "salesOrder" : {
+          "$ref" : "#/definitions/SalesOrder"
+        }
+      },
+      "example" : {
+        "salesOrder" : {
+          "orderHeader" : {
+            "orderIdentifier" : {
+              "orderNumber" : 1235401,
+              "projectName" : "TEST WAY STE 230",
+              "poNumber" : "PO 08122021",
+              "marketCode" : "C07",
+              "marketSegment" : "CORPORATE SERVICE INDUSTRY",
+              "webDisplayableE1OrderNumber" : "1234501-SO"
+            },
+            "companyInfo" : {
+              "companyNumber" : "00350",
+              "externalCompanyNo" : 10151
+            },
+            "branchPlant" : {
+              "id" : "W1",
+              "name" : "W1"
+            },
+            "billToCusomerAcctInfo" : {
+              "addressInfo" : {
+                "name" : "TEST INC",
+                "address2" : "2330 LOGAN ST",
+                "city" : "NASHVILLE",
+                "state" : "TN",
+                "zipCode" : "37211",
+                "country" : "US"
+              }
+            },
+            "shipToCustomerAcctInfo" : {
+              "addressInfo" : {
+                "name" : "TEST INC",
+                "address2" : "2330 LOGAN ST",
+                "city" : "NASHVILLE",
+                "state" : "TN",
+                "zipCode" : "37211",
+                "country" : "US"
+              }
+            },
+            "billToAddress" : {
+              "address1" : "ENDUSE ACCOUNT",
+              "address2" : 121168,
+              "address4" : 0
+            },
+            "orderType" : {
+              "e1OrderType" : "SO"
+            },
+            "accountExecutive" : {
+              "id" : 111111,
+              "name" : "Doe, John"
+            },
+            "csr" : {
+              "id" : "",
+              "name" : "CS R",
+              "email" : "email@email.com"
+            },
+            "totalInventory" : {
+              "totalPrice" : 0
+            }
+          },
+          "orderDetails" : [ {
+            "lineInfo" : {
+              "lineNumber" : "1.000",
+              "sku" : {
+                "itemNumber" : "A00702035020202XX0"
+              },
+              "status" : "Shipping in Process"
+            },
+            "inventory" : {
+              "lotNumber" : "21111",
+              "unitOfMeasure" : "SF",
+              "pricePerUnit" : "3.00",
+              "currency" : "USD",
+              "totalPrice" : "99.99",
+              "lineType" : "S",
+              "quantityOrdered" : "22.22"
+            },
+            "carrierCode" : {
+              "carrierCode" : 100111,
+              "carrierName" : "DHL",
+              "routeCode" : "DHL",
+              "frieghtCode" : "AAA",
+              "billOfLading" : "222222"
+            },
+            "fullfillmentDates" : {
+              "requestedDate" : "2021-08-14T00:00:00-04:00",
+              "orderDate" : "2021-08-14T00:00:00-04:00"
+            }
+          } ],
+          "specialInstructionsCBO" : [ {
+            "specialInstruction" : {
+              "key" : "E1EndUserName",
+              "value" : "MISC ACCOUNT"
+            }
+          }, {
+            "specialInstruction" : {
+              "key" : "E1EndUserNumber",
+              "value" : 124568
+            }
+          } ]
+        }
+      }
+    },
+    "searchSalesOrderInput" : {
+      "type" : "object",
+      "required" : [ "orderSearchCriteria" ],
+      "properties" : {
+        "orderSearchCriteria" : {
+          "$ref" : "#/definitions/OrderSearchCriteria"
+        }
+      },
+      "example" : {
+        "orderSearchCriteria" : {
+          "preDefinedSearchType" : "Material",
+          "preDefinedSearchStatus" : "Allocated",
+          "salesOrderHeader" : {
+            "orderIdentifier" : {
+              "poNumber" : "PO number",
+              "projectName" : "Project name",
+              "marketCode" : "C09",
+              "marketSegment" : "Hospitality",
+              "webDisplayableE1OrderNumber" : "123456-SO"
+            },
+            "billToCustomerAcctInfo" : {
+              "addressInfo" : {
+                "name" : "FINISH LINE FLOORING"
+              }
+            },
+            "shipToCustomerAcctInfo" : {
+              "addressInfo" : {
+                "name" : "FINISH LINE FLOORING"
+              }
+            },
+            "companyInfo" : {
+              "externalCompanyNo" : 10151
+            },
+            "customer" : {
+              "id" : 111111,
+              "customerType" : "EMPLOYEE",
+              "webCustomerNumber" : "Contact_003f4000010AAAAAAA",
+              "accountInfo" : {
+                "e1AccountNumber" : 1245678
+              }
+            }
+          },
+          "orderLineInfo" : {
+            "sideMark" : "my comment on order"
+          },
+          "productSearchText" : "ae310",
+          "startDate" : {
+            "orderDate" : "2021-02-16T00:00:00.000-05:00"
+          },
+          "endDate" : {
+            "orderDate" : "2021-08-16T00:00:00.000-04:00"
+          },
+          "resultsDisplayCriteria" : {
+            "startRow" : 1,
+            "endRow" : 20,
+            "sortOrder" : "DESC",
+            "sortCriteria" : "orderDate"
+          }
+        }
+      }
+    },
+    "searchSalesOrderOutput" : {
+      "type" : "object",
+      "properties" : {
+        "salesOrder" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/SalesOrder"
+          }
+        },
+        "orderSearchCriteria" : {
+          "$ref" : "#/definitions/OrderSearchCriteria"
+        }
+      },
+      "example" : {
+        "salesOrder" : [ {
+          "orderHeader" : {
+            "orderIdentifier" : {
+              "orderNumber" : 1234567,
+              "projectName" : "PLASTIC INC",
+              "poNumber" : "PO 12345",
+              "marketCode" : "C04",
+              "marketSegment" : "MANUFACTURING",
+              "status" : "Confirmed",
+              "webDisplayableE1OrderNumber" : "12355555-SO"
+            },
+            "companyInfo" : {
+              "companyNumber" : "00350",
+              "externalCompanyNo" : 10151
+            },
+            "branchPlant" : {
+              "id" : "W1",
+              "name" : "          W1"
+            },
+            "billToCusomerAcctInfo" : {
+              "addressInfo" : {
+                "name" : "ABC Inc"
+              }
+            },
+            "shipToCustomerAcctInfo" : {
+              "addressInfo" : {
+                "name" : "ABC Inc"
+              }
+            },
+            "orderType" : {
+              "orderType" : "MATERIAL",
+              "e1OrderType" : "SO"
+            },
+            "timeTrack" : {
+              "orderDate" : "2021-08-16T00:00:00-04:00"
+            }
+          }
+        }, {
+          "orderHeader" : {
+            "orderIdentifier" : {
+              "orderNumber" : 1234568,
+              "projectName" : "METAL INC",
+              "poNumber" : "PO 12346",
+              "marketCode" : "090",
+              "marketSegment" : "SAMPLE / MARKETING MATERIAL",
+              "status" : "Shipped",
+              "webDisplayableE1OrderNumber" : "12355555-SO"
+            },
+            "companyInfo" : {
+              "companyNumber" : "00350",
+              "externalCompanyNo" : 10151
+            },
+            "branchPlant" : {
+              "id" : "W1",
+              "name" : "          W1"
+            },
+            "billToCusomerAcctInfo" : {
+              "addressInfo" : {
+                "name" : "ABC Inc"
+              }
+            },
+            "shipToCustomerAcctInfo" : {
+              "addressInfo" : {
+                "name" : "ABC Inc"
+              }
+            },
+            "orderType" : {
+              "orderType" : "MATERIAL",
+              "e1OrderType" : "SO"
+            },
+            "timeTrack" : {
+              "orderDate" : "2021-08-16T00:00:00-04:00"
+            }
+          }
+        }, {
+          "orderHeader" : {
+            "orderIdentifier" : {
+              "orderNumber" : 1234569,
+              "projectName" : "RUBBER INC",
+              "poNumber" : "PO 12347",
+              "marketCode" : "HC1",
+              "marketSegment" : "PUBLIC HOSPITALS/CLINICS",
+              "status" : "Shipping in Process",
+              "webDisplayableE1OrderNumber" : "12355555-SO"
+            },
+            "companyInfo" : {
+              "companyNumber" : "00350",
+              "externalCompanyNo" : 10151
+            },
+            "branchPlant" : {
+              "id" : "W1",
+              "name" : "          W1"
+            },
+            "billToCusomerAcctInfo" : {
+              "addressInfo" : {
+                "name" : "ABC Inc"
+              }
+            },
+            "shipToCustomerAcctInfo" : {
+              "addressInfo" : {
+                "name" : "ABC Inc"
+              }
+            },
+            "orderType" : {
+              "orderType" : "MATERIAL",
+              "e1OrderType" : "SO"
+            },
+            "timeTrack" : {
+              "orderDate" : "2021-08-16T00:00:00-04:00"
+            }
+          }
+        }, {
+          "orderHeader" : {
+            "orderIdentifier" : {
+              "orderNumber" : 1234570,
+              "projectName" : "PLASTIC INC",
+              "poNumber" : "PO 12348",
+              "marketCode" : "PB1",
+              "marketSegment" : "PUBLIC ADMINISTRATION",
+              "status" : "Shipping in Process",
+              "webDisplayableE1OrderNumber" : "12355555-SO"
+            },
+            "companyInfo" : {
+              "companyNumber" : "00350",
+              "externalCompanyNo" : 10151
+            },
+            "branchPlant" : {
+              "id" : "W1",
+              "name" : "          W1"
+            },
+            "billToCusomerAcctInfo" : {
+              "addressInfo" : {
+                "name" : "ABC Inc"
+              }
+            },
+            "shipToCustomerAcctInfo" : {
+              "addressInfo" : {
+                "name" : "ABC Inc"
+              }
+            },
+            "orderType" : {
+              "orderType" : "MATERIAL",
+              "e1OrderType" : "SO"
+            },
+            "timeTrack" : {
+              "orderDate" : "2021-08-16T00:00:00-04:00"
+            }
+          }
+        } ],
+        "orderSearchCriteria" : {
+          "preDefinedSearchType" : "Open",
+          "salesOrderHeader" : {
+            "companyInfo" : {
+              "externalCompanyNo" : 10151
+            },
+            "customer" : {
+              "id" : 111111,
+              "customerType" : "EMPLOYEE",
+              "webCustomerNumber" : "Contact_003f4000010AAAAAAA",
+              "accountInfo" : {
+                "e1AccountNumber" : 1245678
+              }
+            }
+          },
+          "startDate" : {
+            "orderDate" : "2021-02-16T00:00:00.000-05:00"
+          },
+          "endDate" : {
+            "orderDate" : "2021-08-16T00:00:00.000-04:00"
+          },
+          "resultsDisplayCriteria" : {
+            "startRow" : 1,
+            "endRow" : 20,
+            "sortOrder" : "DESC",
+            "sortCriteria" : "orderDate"
+          }
+        }
+      }
+    },
+    "OrderSearchCriteria" : {
+      "type" : "object",
+      "properties" : {
+        "preDefinedSearchType" : {
+          "type" : "string",
+          "description" : "pre defined search type",
+          "enum" : [ "Sample", "Material" ]
+        },
+        "preDefinedSearchStatus" : {
+          "type" : "string",
+          "description" : "pre defined search status",
+          "enum" : [ "Backordered", "Allocated", "Shipping in Process", "Shipped", "Invoiced", "Cancelled" ]
+        },
+        "salesOrderHeader" : {
+          "$ref" : "#/definitions/SalesOrderHeader"
+        },
+        "orderLineInfo" : {
+          "$ref" : "#/definitions/OrderLineInfo"
+        },
+        "startDate" : {
+          "$ref" : "#/definitions/SalesOrderTimeTrack"
+        },
+        "endDate" : {
+          "$ref" : "#/definitions/SalesOrderTimeTrack"
+        },
+        "resultsDisplayCriteria" : {
+          "$ref" : "#/definitions/ResultsDisplayCriteria"
+        },
+        "notificationType" : {
+          "$ref" : "#/definitions/NotificationType"
+        },
+        "productSearchText" : {
+          "type" : "string"
+        },
+        "endUser" : {
+          "type" : "string"
+        }
+      }
+    },
+    "SalesOrderHeader" : {
+      "type" : "object",
+      "properties" : {
+        "orderIdentifier" : {
+          "$ref" : "#/definitions/OrderIdentifier"
+        },
+        "companyInfo" : {
+          "$ref" : "#/definitions/CompanyInfo"
+        },
+        "branchPlant" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/taxServiceInput_branchPlant"
+          }
+        },
+        "orderAmount" : {
+          "$ref" : "#/definitions/OrderAmount"
+        },
+        "billToCustomerAcctInfo" : {
+          "$ref" : "#/definitions/AccountInfo"
+        },
+        "shipToCustomerAcctInfo" : {
+          "$ref" : "#/definitions/AccountInfo"
+        },
+        "shipToAddress" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/AddressInfo"
+          }
+        },
+        "billToAddress" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/AddressInfo"
+          }
+        },
+        "orderType" : {
+          "$ref" : "#/definitions/OrderType"
+        },
+        "actionCode" : {
+          "$ref" : "#/definitions/ActionCode"
+        },
+        "timeTrack" : {
+          "$ref" : "#/definitions/SalesOrderTimeTrack"
+        },
+        "InventoryFrom" : {
+          "$ref" : "#/definitions/SalesOrderHeader_InventoryFrom"
+        },
+        "userReservedFields" : {
+          "$ref" : "#/definitions/SalesOrderHeader_userReservedFields"
+        },
+        "customer" : {
+          "$ref" : "#/definitions/UserInfo"
+        },
+        "accountExecutive" : {
+          "$ref" : "#/definitions/UserInfo"
+        },
+        "csr" : {
+          "$ref" : "#/definitions/UserInfo"
+        },
+        "totalInventory" : {
+          "$ref" : "#/definitions/Inventory"
+        },
+        "additionalAccountExecutive" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/UserInfo"
+          }
+        }
+      },
+      "description" : "model to store Sales Order Header information"
+    },
+    "OrderLineInfo" : {
+      "type" : "object",
+      "properties" : {
+        "lineNumber" : {
+          "type" : "string",
+          "description" : "Sales order details line number"
+        },
+        "sideMark" : {
+          "type" : "string",
+          "description" : "side mark"
+        },
+        "sku" : {
+          "$ref" : "#/definitions/OrderLineInfo_sku"
+        },
+        "status" : {
+          "type" : "string",
+          "description" : "detail line status code"
+        }
+      },
+      "description" : "model to store Order Line information"
+    },
+    "SalesOrderTimeTrack" : {
+      "type" : "object",
+      "properties" : {
+        "requestedDate" : {
+          "type" : "string",
+          "description" : "Sales Order request date"
+        },
+        "cancelDate" : {
+          "type" : "string",
+          "description" : "Sales Order cancel date"
+        },
+        "orderDate" : {
+          "type" : "string",
+          "description" : "Sales Order date"
+        },
+        "promiseDate" : {
+          "type" : "string",
+          "description" : "Promised delivery date"
+        },
+        "shipDate" : {
+          "type" : "string",
+          "description" : "Sales Order shipping date"
+        },
+        "expiryDate" : {
+          "type" : "string",
+          "description" : "Sales Order expiration date"
+        }
+      },
+      "description" : "model to store sales order dates"
+    },
+    "SalesOrder" : {
+      "type" : "object",
+      "properties" : {
+        "orderHeader" : {
+          "$ref" : "#/definitions/SalesOrderHeader"
+        },
+        "orderDetails" : {
+          "$ref" : "#/definitions/SalesOrderDetails"
+        },
+        "specialInstructionsCBO" : {
+          "$ref" : "#/definitions/SpecialInstructionsCBO"
+        }
+      },
+      "description" : "model to store sales order information"
+    },
+    "SalesOrderDetails" : {
+      "type" : "array",
+      "description" : "model to store Sales Order Line Item information",
+      "items" : {
+        "$ref" : "#/definitions/SalesOrderDetails_inner"
+      }
+    },
+    "SpecialInstructionsCBO" : {
+      "type" : "array",
+      "description" : "mode to store Special Instruction information",
+      "items" : {
+        "$ref" : "#/definitions/SpecialInstructionsCBO_inner"
+      }
+    },
+    "SpecialInstructions" : {
+      "type" : "object",
+      "properties" : {
+        "additionalCarrierInformation" : {
+          "type" : "string",
+          "description" : "Format to JDE : Additional Carrier Information:: value"
+        },
+        "endUserNumber" : {
+          "type" : "string",
+          "description" : "Format to JDE : EndUserNumber: value"
+        },
+        "contractNumber" : {
+          "type" : "string",
+          "description" : "Format to JDE : ContractNumber:: value"
+        },
+        "specifierName" : {
+          "type" : "string",
+          "description" : "Format to JDE : SpecifierName: value"
+        },
+        "insideDeliveryRequired" : {
+          "type" : "string",
+          "description" : "Format to JDE : InsideDeliveryRequired: value"
+        },
+        "liftGateRequired" : {
+          "type" : "string",
+          "description" : "Format to JDE : LiftGateRequired: value"
+        },
+        "acceptedTermsAndConditions" : {
+          "type" : "string",
+          "description" : "Format to JDE : AcceptedTermsAndConditions: value as enum below",
+          "enum" : [ "True", "False" ]
+        },
+        "acceptedMultipleDyelots" : {
+          "type" : "string",
+          "description" : "Format to JDE : AcceptedMultipleDyelots: value"
+        },
+        "frieghtSystem" : {
+          "type" : "string",
+          "description" : "Format to JDE : Frieght System: value"
+        },
+        "shippingCarrier" : {
+          "type" : "string",
+          "description" : "Format to JDE : Shipping Carrier: [frieghtType] carrierNumber carrierCodeDescription"
+        },
+        "aeName" : {
+          "type" : "string",
+          "description" : "Format to JDE : AEName: value"
+        },
+        "aeInformation" : {
+          "type" : "string",
+          "description" : "Format to JDE : AEInformation: value"
+        },
+        "aeEmail" : {
+          "type" : "string",
+          "description" : "Format to JDE : aeEmail: value"
+        },
+        "attentionTo" : {
+          "type" : "string",
+          "description" : "Used in Ship To Address"
+        },
+        "requestedShipDate" : {
+          "type" : "string",
+          "description" : "Format to JDE : RequestedShipDate: value"
+        },
+        "otherSpecialNotes1" : {
+          "type" : "string",
+          "description" : "QuoteNumber, else AEInformation"
+        },
+        "otherSpecialNotes2" : {
+          "type" : "string",
+          "description" : "Bill To E1AccountNumber"
+        },
+        "otherSpecialNotes3" : {
+          "type" : "string",
+          "description" : "not in use"
+        },
+        "otherSpecialNotes4" : {
+          "type" : "string",
+          "description" : "concat of Addr 1/2/3/4, city, state, zip and country"
+        },
+        "otherSpecialNotes5" : {
+          "type" : "string",
+          "description" : "actionCode"
+        },
+        "otherSpecialNotes6" : {
+          "type" : "string",
+          "description" : "Attn To"
+        },
+        "otherSpecialNotes7" : {
+          "type" : "string",
+          "description" : "Format to JDE : Accepted Overage: true/false value"
+        },
+        "otherSpecialNotes8" : {
+          "type" : "string",
+          "description" : "Total Shipping charge incl Tax and Currency"
+        },
+        "partnumbersToBeExcluded" : {
+          "type" : "string",
+          "description" : "item number to be excluded from sales order"
+        }
+      },
+      "description" : "mode to store Special Instruction information"
+    },
+    "UserInfo" : {
+      "type" : "object",
+      "properties" : {
+        "id" : {
+          "type" : "string"
+        },
+        "name" : {
+          "type" : "string",
+          "description" : "First Name"
+        },
+        "lastName" : {
+          "type" : "string",
+          "description" : "Last Name"
+        },
+        "email" : {
+          "type" : "string",
+          "description" : "Email address"
+        },
+        "phone" : {
+          "type" : "string"
+        },
+        "customerType" : {
+          "type" : "string",
+          "description" : "In case of order entry, allowed values are in enum as Single Character. In case of search sales order, allowed values are verbiage",
+          "enum" : [ "E", "C", "S", "EMPLOYEE", "CUSTOMER", "SALES", "" ]
+        },
+        "webCustomerNumber" : {
+          "type" : "string",
+          "description" : "web customer id"
+        },
+        "accountInfo" : {
+          "$ref" : "#/definitions/AccountInfo"
+        },
+        "associatedAE" : {
+          "type" : "string"
+        },
+        "addressInfo" : {
+          "$ref" : "#/definitions/AddressInfo"
+        }
+      }
+    },
+    "AccountInfo" : {
+      "type" : "object",
+      "properties" : {
+        "e1AccountNumber" : {
+          "type" : "string",
+          "description" : "In case of material order entry, this field should have E1 Account number. Also this should have same value as aeE1AccountNumber in case customerType E"
+        },
+        "aeE1AccountNumber" : {
+          "type" : "string",
+          "description" : "In case of sample order entry, this field should have AE E1 Account number or else send in otherSpecialNote2"
+        },
+        "e1ExtAccountNumber" : {
+          "type" : "string"
+        },
+        "addressInfo" : {
+          "$ref" : "#/definitions/AddressInfo"
+        },
+        "parentAccount" : {
+          "type" : "string"
+        }
+      }
+    },
+    "AddressInfo" : {
+      "type" : "object",
+      "properties" : {
+        "contactFirstName" : {
+          "type" : "string",
+          "description" : "In case of Ship To, attentionTo first name"
+        },
+        "contactLastName" : {
+          "type" : "string",
+          "description" : "In case of Ship To, attentionTo last name"
+        },
+        "name" : {
+          "type" : "string",
+          "description" : "In case of Ship To, name is organization name"
+        },
+        "address1" : {
+          "type" : "string",
+          "description" : "In case of Ship To, MW make Contact First and Last Name to Addr1 for ERP"
+        },
+        "address2" : {
+          "type" : "string",
+          "description" : "In case of Ship To, Address Line 1 will be saved in address2"
+        },
+        "address3" : {
+          "type" : "string",
+          "description" : "In case of Ship To, address3 is concat of Address Line 2 and 3"
+        },
+        "address4" : {
+          "type" : "string",
+          "description" : "In case of Ship To, address4 is Shipping Contact telephone"
+        },
+        "city" : {
+          "type" : "string",
+          "description" : "City Name"
+        },
+        "state" : {
+          "type" : "string",
+          "description" : "Underscore delimited State and Country ISO Code"
+        },
+        "zipCode" : {
+          "type" : "string",
+          "description" : "Zip or Postal code"
+        },
+        "country" : {
+          "type" : "string",
+          "description" : "Country ISO Code"
+        },
+        "telephone" : {
+          "type" : "string",
+          "description" : "Contact number"
+        }
+      }
+    },
+    "SalesOrderEntry" : {
+      "type" : "object",
+      "properties" : {
+        "salesOrderHeader" : {
+          "$ref" : "#/definitions/SalesOrderHeader"
+        },
+        "salesOrderDetails" : {
+          "$ref" : "#/definitions/SalesOrderDetails"
+        },
+        "salesOrderSpecialInst" : {
+          "$ref" : "#/definitions/SpecialInstructions"
+        }
+      }
+    },
+    "AcknowlegeOrder" : {
+      "type" : "object",
+      "properties" : {
+        "DataArea" : {
+          "$ref" : "#/definitions/AcknowlegeOrder_DataArea"
+        }
+      }
+    },
+    "Acknowledge" : {
+      "type" : "object",
+      "properties" : {
+        "ResponseCriteria" : {
+          "$ref" : "#/definitions/ResponseCriteria"
+        }
+      }
+    },
+    "ResponseCriteria" : {
+      "type" : "object",
+      "properties" : {
+        "ChangeStatus" : {
+          "$ref" : "#/definitions/ResponseCriteria_ChangeStatus"
+        }
+      }
+    },
+    "OrderResponseType" : {
+      "type" : "object",
+      "properties" : {
+        "OrderIdentifier" : {
+          "$ref" : "#/definitions/OrderResponseType_OrderIdentifier"
+        },
+        "StoreIdentifier" : {
+          "$ref" : "#/definitions/OrderResponseType_StoreIdentifier"
+        }
+      }
+    },
+    "PushUser" : {
+      "type" : "object",
+      "properties" : {
+        "User" : {
+          "$ref" : "#/definitions/User"
+        }
+      }
+    },
+    "ContactInformation" : {
+      "type" : "object",
+      "properties" : {
+        "FirstName" : {
+          "type" : "string",
+          "description" : "Signup User First Name"
+        },
+        "LastName" : {
+          "type" : "string",
+          "description" : "Signup User Last Name"
+        },
+        "OrganizationName" : {
+          "type" : "string",
+          "description" : "Signup User Org Name"
+        },
+        "AddressLine1" : {
+          "type" : "string",
+          "description" : "Signup User Address Line 1"
+        },
+        "AddressLine2" : {
+          "type" : "string",
+          "description" : "Signup User Address Line 2"
+        },
+        "AddressLine3" : {
+          "type" : "string",
+          "description" : "Signup User Address Line 3"
+        },
+        "City" : {
+          "type" : "string",
+          "description" : "Signup User City Name"
+        },
+        "State" : {
+          "type" : "string",
+          "description" : "Signup User underscore delimited Country & State ISO code"
+        },
+        "ZipPostalCode" : {
+          "type" : "string",
+          "description" : "Signup User Postal Code"
+        },
+        "Country" : {
+          "type" : "string",
+          "description" : "Signup User Country ISO Code"
+        },
+        "PhoneNumber" : {
+          "type" : "string",
+          "description" : "Signup User formatted Phone number"
+        },
+        "EmailAddress" : {
+          "type" : "string",
+          "description" : "Signup User valid email address"
+        }
+      }
+    },
+    "UserIdentifier" : {
+      "type" : "object",
+      "properties" : {
+        "DistinguishedName" : {
+          "type" : "string",
+          "description" : "deprecated Signup User unique combination of heirarchy - user/org/root Please see example for more information"
+        }
+      }
+    },
+    "CredentialInformation" : {
+      "type" : "object",
+      "properties" : {
+        "LogonID" : {
+          "type" : "string",
+          "description" : "Signup User unique website logon id"
+        }
+      }
+    },
+    "createSalesOrderInput" : {
+      "type" : "object",
+      "properties" : {
+        "salesOrderEntry" : {
+          "$ref" : "#/definitions/SalesOrderEntry"
+        }
+      },
+      "example" : {
+        "salesOrderEntry" : {
+          "salesOrderHeader" : {
+            "orderIdentifier" : {
+              "webOrderNumber" : "1234567",
+              "poNumber" : "PO12345",
+              "jobName" : "PRINT JOB",
+              "quoteId" : "Q-1234",
+              "marketCode" : "C08"
+            },
+            "orderAmount" : {
+              "totalShippingCharge" : 12.99,
+              "totalShippingTax" : 1.99,
+              "currency" : "USD"
+            },
+            "companyInfo" : {
+              "externalCompanyNo" : 10151,
+              "externalCompanyName" : "Interface USA"
+            },
+            "orderType" : {
+              "orderType" : "MATERIAL"
+            },
+            "actionCode" : {
+              "actionType" : "A",
+              "orderProcessName" : "M1"
+            },
+            "customer" : {
+              "email" : "fname@company.com",
+              "lastName" : "Name",
+              "name" : "First"
+            },
+            "billToCustomerAcctInfo" : {
+              "e1AccountNumber" : 123500
+            },
+            "shipToCustomerAcctInfo" : {
+              "addressInfo" : {
+                "name" : "Floor Shipping Company",
+                "contactFirstName" : "First Name",
+                "contactLastName" : "Last Name",
+                "address1" : "Freeway Dr",
+                "address2" : "Bldg 4",
+                "address3" : "Suite 100",
+                "address4" : "Desk 1",
+                "city" : "Columbus",
+                "state" : "US_OH",
+                "country" : "US",
+                "zipCode" : "123456",
+                "telephone" : "(111) 222 3333"
+              }
+            }
+          },
+          "salesOrderDetails" : [ {
+            "actionType" : {
+              "actionType" : "A"
+            },
+            "carrierCode" : {
+              "carrierCode" : "100256",
+              "frieghtCode" : "ABC",
+              "routeCode" : "XYZ",
+              "description" : "Best Way"
+            },
+            "lineInfo" : {
+              "sideMark" : "item 1 comments"
+            },
+            "inventory" : {
+              "currency" : "USD",
+              "pricePerUnit" : "10.0000",
+              "quantity" : "100.00",
+              "unitOfMeasure" : "SY",
+              "totalPrice" : "1000.0000",
+              "sku" : {
+                "itemNumber" : "7928006999G17S001"
+              }
+            },
+            "fullfillmentDates" : {
+              "requestedDate" : "2021-08-17T16:00:00.000Z"
+            },
+            "customerInfo" : {
+              "webCustomerNumber" : 1111111,
+              "customerType" : "C",
+              "id" : "Contact_003f4000010AAAAAA"
+            }
+          }, {
+            "actionType" : {
+              "actionType" : "A"
+            },
+            "carrierCode" : {
+              "frieghtCode" : "ABC",
+              "routeCode" : "XYZ",
+              "description" : "Best Way"
+            },
+            "lineInfo" : {
+              "sideMark" : "item 2 comments"
+            },
+            "inventory" : {
+              "currency" : "USD",
+              "pricePerUnit" : "10.0000",
+              "quantity" : "10.00",
+              "unitOfMeasure" : "SY",
+              "totalPrice" : "100.0000",
+              "sku" : {
+                "itemNumber" : "A01004A001AA000"
+              }
+            },
+            "fullfillmentDates" : {
+              "requestedDate" : "2021-08-17T16:00:00.000Z"
+            },
+            "customerInfo" : {
+              "webCustomerNumber" : 1111111,
+              "customerType" : "C",
+              "id" : "Contact_003f4000010AAAAAA"
+            }
+          } ],
+          "salesOrderSpecialInst" : {
+            "additionalCarrierInformation" : "Attn: Bev Name",
+            "attentionTo" : "PutMyNameInShipTo",
+            "endUserNumber" : "DAS;",
+            "specifierName" : "DAS;",
+            "acceptedTermsAndConditions" : "accept",
+            "acceptedMultipleDyelots" : "False",
+            "requestedShipDate" : "2021-08-17T16:00:00.000Z;",
+            "otherSpecialNotes7" : "10.00",
+            "partnumbersToBeExcluded" : "A01004A001AA000"
+          }
+        }
+      }
+    },
+    "createSalesOrderOutput" : {
+      "type" : "object",
+      "properties" : {
+        "acknowledgeOrder" : {
+          "$ref" : "#/definitions/AcknowlegeOrder"
+        }
+      },
+      "example" : {
+        "acknowledgeOrder" : {
+          "DataArea" : {
+            "Order" : {
+              "OrderIdentifier" : {
+                "ExternalOrderID" : "123456-SO"
+              },
+              "StoreIdentifier" : {
+                "UniqueID" : "00350"
+              }
+            }
+          }
+        }
+      }
+    },
+    "userRegistrationInput" : {
+      "type" : "object",
+      "properties" : {
+        "pushUser" : {
+          "$ref" : "#/definitions/PushUser"
+        }
+      },
+      "example" : {
+        "pushUser" : {
+          "Action" : "Create/Update User",
+          "User" : {
+            "CredentialInformation" : {
+              "LogonID" : "north@south.com"
+            },
+            "ContactInformation" : {
+              "FirstName" : "north",
+              "LastName" : "South",
+              "AddressLine1" : "Direction Dr",
+              "City" : "Compass",
+              "State" : "GA",
+              "ZipPostalCode" : "30004",
+              "Country" : "US",
+              "PhoneNumber" : "(404) 303-2002",
+              "OrganizationName" : "Needle Inc",
+              "EmailAddress" : "north@south.com"
+            },
+            "UserAttributes" : [ {
+              "Name" : "CRMRowId",
+              "Value" : [ {
+                "Value" : "Lead_xyz123"
+              } ]
+            }, {
+              "Name" : "userId",
+              "Value" : [ {
+                "Value" : "123456"
+              } ]
+            }, {
+              "Name" : "MarketSegments",
+              "Value" : [ {
+                "Value" : "Corp"
+              }, {
+                "Value" : "Retail"
+              } ]
+            }, {
+              "Name" : "ProjectDuration",
+              "Value" : [ {
+                "Value" : "Yes, and I need flooring ASAP!"
+              } ]
+            }, {
+              "Name" : "ProjectSize",
+              "Value" : [ {
+                "Value" : "Large"
+              } ]
+            }, {
+              "Name" : "CustomerType",
+              "Value" : [ {
+                "Value" : "Architect"
+              } ]
+            }, {
+              "Name" : "CustomerTypeOther",
+              "Value" : [ {
+                "Value" : "Developer"
+              } ]
+            }, {
+              "Name" : "MarketPreferences",
+              "Value" : [ {
+                "Value" : "True"
+              } ]
+            }, {
+              "Name" : "EmailOptInStatus",
+              "Value" : [ {
+                "Value" : "Single Opt-In"
+              } ]
+            }, {
+              "Name" : "Salutation",
+              "Value" : [ {
+                "Value" : "Mr."
+              } ]
+            }, {
+              "Name" : "WebSite_Identifier",
+              "Value" : [ {
+                "Value" : "IFS"
+              } ]
+            }, {
+              "Name" : "preferredLanguage",
+              "Value" : [ {
+                "Value" : "-1"
+              } ]
+            } ]
+          }
+        }
+      }
+    },
+    "userRegistrationOutput" : {
+      "type" : "object",
+      "properties" : {
+        "pushUserConfirmation" : {
+          "$ref" : "#/definitions/PushUserConfirmation"
+        }
+      },
+      "example" : {
+        "pushUserConfirmation" : {
+          "Action" : "UpdateUser",
+          "Result" : "SUCCESS",
+          "UserIdentifier" : {
+            "DistinguishedName" : "uid=north@south.com,o=default organization,o=root organization"
+          }
+        }
+      }
+    },
+    "User" : {
+      "type" : "object",
+      "properties" : {
+        "ContactInformation" : {
+          "$ref" : "#/definitions/ContactInformation"
+        },
+        "CredentialInformation" : {
+          "$ref" : "#/definitions/CredentialInformation"
+        },
+        "UserAttributes" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/ContextAttribute"
+          }
+        }
+      }
+    },
+    "ContextAttribute" : {
+      "type" : "object",
+      "properties" : {
+        "Name" : {
+          "type" : "string",
+          "enum" : [ "CRMRowId", "userId", "MarketSegments", "ProjectDuration", "ProjectSize", "CustomerType", "CustomerTypeOther", "MarketPreferences", "EmailOptInStatus", "Salutation", "WebSite_Identifier", "preferredLanguage" ]
+        },
+        "Value" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/ContextAttribute_Value"
+          }
+        }
+      },
+      "description" : "all below fields are optional. If CRMRowId is present with Lead_<crm row id> or Contact_<crm row id> and service will update existing Lead or Contact."
+    },
+    "PushUserConfirmation" : {
+      "type" : "object",
+      "properties" : {
+        "Action" : {
+          "type" : "string"
+        },
+        "Result" : {
+          "type" : "string"
+        },
+        "UserIdentifier" : {
+          "$ref" : "#/definitions/UserIdentifier"
+        }
+      }
+    },
+    "OrderType" : {
+      "type" : "object",
+      "properties" : {
+        "orderType" : {
+          "type" : "string",
+          "description" : "Website order type Material or Sample",
+          "enum" : [ "SAMPLE", "TEMPORARY", "MATERIAL", "STOCKANDHOLD", "HOLD", "MOCKUP" ]
+        },
+        "e1OrderType" : {
+          "type" : "string",
+          "enum" : [ "SM", "SA", "N1", "SO", "SL", "S9", "SX", "SG", "S7", "SU", "CB", "CJ", "CU", "D1", "DB", "DJ", "DW", "DU", "NC", "S2", "SD", "ST" ]
+        },
+        "tempOrderType" : {
+          "type" : "string"
+        }
+      }
+    },
+    "NotificationType" : {
+      "type" : "object",
+      "properties" : {
+        "notificationType" : {
+          "type" : "string",
+          "enum" : [ "OrderAcknowledgement", "PlannedPromiseDate", "OrderAllocation", "ShipmentConfirmation", "HoldOrder24HrExpiration", "HoldOrderExpired" ]
+        },
+        "statusFlag" : {
+          "type" : "string",
+          "enum" : [ "T", "F" ]
+        },
+        "jobNumber" : {
+          "type" : "string"
+        },
+        "noOfAckNotifications" : {
+          "type" : "string"
+        },
+        "autoAcknowledge" : {
+          "type" : "string"
+        }
+      }
+    },
+    "ResultsDisplayCriteria" : {
+      "type" : "object",
+      "properties" : {
+        "startRow" : {
+          "type" : "string"
+        },
+        "endRow" : {
+          "type" : "string"
+        },
+        "sortOrder" : {
+          "type" : "string",
+          "enum" : [ "ASC", "DESC" ]
+        },
+        "sortCriteria" : {
+          "type" : "string",
+          "enum" : [ "orderDate", "orderNumber", "company", "orderType", "projectName", "branchPlant", "pONumber", "status", "shipTo", "soldTo" ]
+        },
+        "totalResultsCount" : {
+          "type" : "string"
+        }
+      }
+    },
+    "ActionCode" : {
+      "type" : "object",
+      "properties" : {
+        "actionType" : {
+          "type" : "string",
+          "description" : "A - add, D - delete, C - changed. Default A",
+          "enum" : [ "A", "D", "C" ]
+        },
+        "confirmOrder" : {
+          "type" : "boolean",
+          "description" : "boolean value"
+        },
+        "orderProcessName" : {
+          "type" : "string",
+          "description" : "M1 - for material, S1 - for samples. It will be set based on orderType",
+          "enum" : [ "T1", "M1", "S1", "H1", "R1", "S71" ]
+        }
+      }
+    },
+    "AccountExecutiveCBO" : {
+      "type" : "object",
+      "properties" : {
+        "message" : {
+          "type" : "string"
+        },
+        "accountExecutive" : {
+          "$ref" : "#/definitions/AccountExecutive"
+        }
+      }
+    },
+    "AccountExecutive" : {
+      "type" : "object",
+      "properties" : {
+        "AE_Region_SalesNumber" : {
+          "type" : "string"
+        },
+        "FirstName" : {
+          "type" : "string"
+        },
+        "LastName" : {
+          "type" : "string"
+        },
+        "PhoneNumber" : {
+          "type" : "string"
+        },
+        "EmailId" : {
+          "type" : "string"
+        },
+        "Country" : {
+          "type" : "string"
+        },
+        "Region" : {
+          "type" : "string"
+        }
+      }
+    },
+    "Error" : {
+      "type" : "object",
+      "properties" : {
+        "errorCode" : {
+          "type" : "string",
+          "description" : "wrapper error codes to indicate origination of backend server error",
+          "enum" : [ "MW1001E", "MW1002E", "MW1003E", "MW2001E", "MW2002E", "MW2003E", "MW3001E", "MW3002E", "MW3003E", "MWX001E" ]
+        },
+        "errorDesc" : {
+          "type" : "string",
+          "example" : "Error Occurrent in MW. Invalid Item Number",
+          "description" : "MW1xxxE will be MW errors, MW2xxxE JDE , MW3xxxE CRM and MWX unknown"
+        }
+      }
+    },
+    "Inventory" : {
+      "type" : "object",
+      "properties" : {
+        "lotNumber" : {
+          "type" : "string"
+        },
+        "location" : {
+          "type" : "string"
+        },
+        "quantity" : {
+          "type" : "string",
+          "description" : "Order Quantity"
+        },
+        "unitOfMeasure" : {
+          "type" : "string"
+        },
+        "branchPlant" : {
+          "$ref" : "#/definitions/taxServiceInput_branchPlant"
+        },
+        "sku" : {
+          "$ref" : "#/definitions/Inventory_sku"
+        },
+        "pricePerUnit" : {
+          "type" : "string",
+          "description" : "Item Price per Unit"
+        },
+        "currency" : {
+          "type" : "string"
+        },
+        "dyelot" : {
+          "type" : "string"
+        },
+        "totalPrice" : {
+          "type" : "string"
+        },
+        "lineType" : {
+          "type" : "string"
+        },
+        "quantityOrdered" : {
+          "type" : "string"
+        },
+        "quantityShipped" : {
+          "type" : "string"
+        },
+        "quantityBackOrdered" : {
+          "type" : "string"
+        },
+        "quantityCancelled" : {
+          "type" : "string"
+        },
+        "quantityAllocated" : {
+          "type" : "string"
+        }
+      },
+      "description" : "Line item information object"
+    },
+    "OrderIdentifier" : {
+      "type" : "object",
+      "properties" : {
+        "temporaryOrderNumber" : {
+          "type" : "string",
+          "description" : "temporary order number"
+        },
+        "orderNumber" : {
+          "type" : "string",
+          "description" : "committed or confirmed order number"
+        },
+        "webOrderNumber" : {
+          "type" : "string",
+          "example" : "",
+          "description" : "website generated order number"
+        },
+        "projectName" : {
+          "type" : "string",
+          "description" : "project name associated with sales order"
+        },
+        "jobName" : {
+          "type" : "string",
+          "description" : "job name associated with sales order"
+        },
+        "poNumber" : {
+          "type" : "string",
+          "description" : "Customer PO"
+        },
+        "quoteId" : {
+          "type" : "string",
+          "description" : "Q-1234 or AE Name"
+        },
+        "marketCode" : {
+          "type" : "string",
+          "description" : "market code as defined by DMS and managed in ERP"
+        },
+        "marketSegment" : {
+          "type" : "string",
+          "description" : "market segment as defined by DMS and managed in ERP"
+        },
+        "status" : {
+          "type" : "string",
+          "description" : "Current Sales Order status"
+        },
+        "changeReasonCode" : {
+          "type" : "string",
+          "description" : "in case of order edit process, change reason code"
+        },
+        "webDisplayableE1OrderNumber" : {
+          "type" : "string",
+          "description" : "displayable order number. Hyphen delimited website displayable ERP order number and order type"
+        }
+      },
+      "description" : "Object model to distinguish Sales Order in various system of records"
+    },
+    "CompanyInfo" : {
+      "type" : "object",
+      "properties" : {
+        "companyNumber" : {
+          "type" : "string",
+          "description" : "Company Number"
+        },
+        "temporaryOrderCompany" : {
+          "type" : "string",
+          "description" : "temporary Company Number"
+        },
+        "externalCompanyNo" : {
+          "type" : "string",
+          "description" : "Store id which signifies Store Front Company Number"
+        },
+        "externalCompanyName" : {
+          "type" : "string",
+          "description" : "Store Front or Company Name"
+        }
+      },
+      "description" : "Object model for company or site information"
+    },
+    "OrderAmount" : {
+      "type" : "object",
+      "properties" : {
+        "grandTotal" : {
+          "type" : "string"
+        },
+        "totalProductPrice" : {
+          "type" : "string"
+        },
+        "totalAdjustment" : {
+          "type" : "string"
+        },
+        "totalShippingCharge" : {
+          "type" : "string"
+        },
+        "totalSalesTax" : {
+          "type" : "string"
+        },
+        "totalShippingTax" : {
+          "type" : "string"
+        },
+        "currency" : {
+          "type" : "string",
+          "description" : "USD or dollar sign"
+        }
+      },
+      "description" : "Total Amount of an order"
+    },
+    "taxServiceInput_orderTypes" : {
+      "type" : "object",
+      "properties" : {
+        "id" : {
+          "type" : "string",
+          "description" : "order identifier for which this tax is going to be calculated"
+        },
+        "orderType" : {
+          "type" : "string",
+          "example" : "",
+          "enum" : [ "MATERIAL", "SAMPLE" ]
+        },
+        "tempOrderType" : {
+          "type" : "string",
+          "example" : "",
+          "enum" : [ "Shipping", "Sales" ]
+        },
+        "e1OrderType" : {
+          "type" : "string"
+        }
+      }
+    },
+    "taxServiceInput_branchPlant" : {
+      "type" : "object",
+      "properties" : {
+        "id" : {
+          "type" : "string"
+        },
+        "name" : {
+          "type" : "string"
+        }
+      }
+    },
+    "taxServiceInput_shipToAddress" : {
+      "type" : "object"
+    },
+    "taxServiceOutput_orderTypeDetails" : {
+      "type" : "object",
+      "properties" : {
+        "id" : {
+          "type" : "string"
+        },
+        "orderType" : {
+          "type" : "string"
+        },
+        "tempOrderType" : {
+          "type" : "string"
+        },
+        "e1OrderType" : {
+          "type" : "string"
+        }
+      }
+    },
+    "taxServiceOutput_taxInformation" : {
+      "type" : "object",
+      "properties" : {
+        "shippingAddress" : {
+          "$ref" : "#/definitions/AddressInfo"
+        },
+        "billingAddress" : {
+          "$ref" : "#/definitions/AddressInfo"
+        },
+        "taxExempt" : {
+          "type" : "string"
+        },
+        "itemInformation" : {
+          "$ref" : "#/definitions/Inventory"
+        },
+        "taxCalculated" : {
+          "type" : "string",
+          "description" : "calculated tax value"
+        },
+        "taxRate" : {
+          "type" : "string",
+          "description" : "calculated tax rate"
+        }
+      }
+    },
+    "taxServiceOutput_lineTaxInformation" : {
+      "type" : "object",
+      "properties" : {
+        "taxInformation" : {
+          "$ref" : "#/definitions/taxServiceOutput_taxInformation"
+        }
+      }
+    },
+    "inventoryInput_sku" : {
+      "type" : "object",
+      "required" : [ "itemNumber", "uom" ],
+      "properties" : {
+        "itemNumber" : {
+          "type" : "string",
+          "description" : "ERP second item number. It can be Carpet, Vinyl Sheet, Vinyl Tile,  Rigid Core, Collateral, Adhsives etc"
+        },
+        "uom" : {
+          "type" : "string",
+          "description" : "Commerce Unit of Measure"
+        }
+      }
+    },
+    "inventoryInput_branch" : {
+      "type" : "object",
+      "required" : [ "id" ],
+      "properties" : {
+        "id" : {
+          "type" : "string",
+          "description" : "Store id (Site id) which signifies Store Front Company Number, its mapped to JDE Branch Plant value (W1, CW1 etc)",
+          "enum" : [ "int-us", "int-ca", "int-latam" ]
+        }
+      }
+    },
+    "inventoryOutput_inventoryDetails" : {
+      "type" : "object",
+      "properties" : {
+        "dyelotkey" : {
+          "type" : "string",
+          "description" : "Static key name per HCL commerce managed codes",
+          "enum" : [ "DYELOT_QTY" ]
+        },
+        "dyelotQnty" : {
+          "type" : "string",
+          "description" : "it is set as underscore delimited DYELOT & Quantity"
+        }
+      }
+    },
+    "inventoryOutput_inventory" : {
+      "type" : "object",
+      "properties" : {
+        "itemNumber" : {
+          "type" : "string",
+          "description" : "ERP second item number. It can be Carpet, Vinyl Sheet, Vinyl Tile,  Rigid Core, Collateral, Adhsives etc"
+        },
+        "storeNumber" : {
+          "type" : "string",
+          "description" : "Store id which signifies Store Front Company Number"
+        },
+        "storeName" : {
+          "type" : "string",
+          "description" : "Store Front or Company Number Name"
+        },
+        "UOM" : {
+          "type" : "string",
+          "description" : "Unit Of Measure, as per HCL commerce managed codes"
+        },
+        "itemTotalQty" : {
+          "type" : "string",
+          "description" : "Total Available Quantity across all dyelots"
+        },
+        "inventoryDetails" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/inventoryOutput_inventoryDetails"
+          }
+        }
+      }
+    },
+    "getSalesOrderInput_salesOrderHeader_customer_accountInfo" : {
+      "type" : "object",
+      "required" : [ "e1AccountNumber" ],
+      "properties" : {
+        "e1AccountNumber" : {
+          "type" : "string"
+        },
+        "e1ExtAccountNumber" : {
+          "type" : "string"
+        }
+      }
+    },
+    "getSalesOrderInput_salesOrderHeader_customer" : {
+      "type" : "object",
+      "required" : [ "accountInfo", "customerType" ],
+      "properties" : {
+        "customerType" : {
+          "type" : "string",
+          "enum" : [ "CUSTOMER", "SALES", "EMPLOYEE" ]
+        },
+        "webCustomerNumber" : {
+          "type" : "string"
+        },
+        "accountInfo" : {
+          "$ref" : "#/definitions/getSalesOrderInput_salesOrderHeader_customer_accountInfo"
+        }
+      }
+    },
+    "getSalesOrderInput_salesOrderHeader" : {
+      "type" : "object",
+      "properties" : {
+        "orderIdentifier" : {
+          "$ref" : "#/definitions/taxServiceInput_shipToAddress"
+        },
+        "companyInfo" : {
+          "$ref" : "#/definitions/taxServiceInput_shipToAddress"
+        },
+        "branchPlant" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/taxServiceInput_branchPlant"
+          }
+        },
+        "orderType" : {
+          "$ref" : "#/definitions/taxServiceInput_shipToAddress"
+        },
+        "customer" : {
+          "$ref" : "#/definitions/getSalesOrderInput_salesOrderHeader_customer"
+        }
+      }
+    },
+    "SalesOrderHeader_InventoryFrom" : {
+      "type" : "object",
+      "properties" : {
+        "inventoryFrom" : {
+          "type" : "string"
+        }
+      }
+    },
+    "SalesOrderHeader_userReservedFields" : {
+      "type" : "object",
+      "properties" : {
+        "userReservedField1" : {
+          "type" : "string",
+          "description" : "Shipping Contact First Name And Last Name"
+        },
+        "userReservedField2" : {
+          "type" : "string",
+          "description" : "Organization Name"
+        },
+        "userReservedField3" : {
+          "type" : "string",
+          "description" : "Shipping Telephone Number"
+        }
+      }
+    },
+    "OrderLineInfo_sku" : {
+      "type" : "object",
+      "properties" : {
+        "itemNumber" : {
+          "type" : "string",
+          "description" : "ERP second item number"
+        },
+        "stockingType" : {
+          "type" : "string"
+        },
+        "styleNumber" : {
+          "type" : "string"
+        },
+        "styleName" : {
+          "type" : "string"
+        },
+        "colorNumber" : {
+          "type" : "string"
+        },
+        "colorName" : {
+          "type" : "string"
+        },
+        "pattern" : {
+          "type" : "string"
+        },
+        "backing" : {
+          "type" : "string"
+        },
+        "size" : {
+          "type" : "string"
+        },
+        "option" : {
+          "type" : "string"
+        },
+        "grade" : {
+          "type" : "string"
+        }
+      },
+      "description" : "SKU information"
+    },
+    "SalesOrderDetails_inner_actionType" : {
+      "type" : "object",
+      "properties" : {
+        "actionType" : {
+          "type" : "string"
+        },
+        "confirmOrder" : {
+          "type" : "string"
+        },
+        "orderProcessName" : {
+          "type" : "string"
+        }
+      }
+    },
+    "SalesOrderDetails_inner_carrierCode" : {
+      "type" : "object",
+      "properties" : {
+        "carrierCode" : {
+          "type" : "string",
+          "description" : "skip for LatAm"
+        },
+        "carrierName" : {
+          "type" : "string"
+        },
+        "routeCode" : {
+          "type" : "string",
+          "description" : "skip for LatAm"
+        },
+        "frieghtCode" : {
+          "type" : "string",
+          "description" : "set for all region"
+        },
+        "description" : {
+          "type" : "string"
+        },
+        "trackingNumber" : {
+          "type" : "string"
+        },
+        "billOfLading" : {
+          "type" : "string"
+        }
+      }
+    },
+    "SalesOrderDetails_inner_tax" : {
+      "type" : "object",
+      "properties" : {
+        "shippingAddress" : {
+          "$ref" : "#/definitions/AddressInfo"
+        },
+        "billingAddress" : {
+          "$ref" : "#/definitions/AddressInfo"
+        },
+        "taxExempt" : {
+          "type" : "string"
+        },
+        "inventory" : {
+          "$ref" : "#/definitions/Inventory"
+        },
+        "taxCalculated" : {
+          "type" : "string"
+        },
+        "taxRate" : {
+          "type" : "string"
+        }
+      }
+    },
+    "SalesOrderDetails_inner_userReserveFieldInfo" : {
+      "type" : "object",
+      "properties" : {
+        "userReservedField1" : {
+          "type" : "string"
+        },
+        "userReservedField2" : {
+          "type" : "string"
+        },
+        "userReservedField3" : {
+          "type" : "string"
+        }
+      }
+    },
+    "SalesOrderDetails_inner" : {
+      "type" : "object",
+      "properties" : {
+        "actionType" : {
+          "$ref" : "#/definitions/SalesOrderDetails_inner_actionType"
+        },
+        "customerInfo" : {
+          "$ref" : "#/definitions/UserInfo"
+        },
+        "lineInfo" : {
+          "$ref" : "#/definitions/taxServiceInput_shipToAddress"
+        },
+        "inventory" : {
+          "$ref" : "#/definitions/Inventory"
+        },
+        "carrierCode" : {
+          "$ref" : "#/definitions/SalesOrderDetails_inner_carrierCode"
+        },
+        "tax" : {
+          "$ref" : "#/definitions/SalesOrderDetails_inner_tax"
+        },
+        "userReserveFieldInfo" : {
+          "$ref" : "#/definitions/SalesOrderDetails_inner_userReserveFieldInfo"
+        },
+        "fullfillmentDates" : {
+          "$ref" : "#/definitions/SalesOrderTimeTrack"
+        }
+      }
+    },
+    "SpecialInstructionsCBO_inner_specialInstruction" : {
+      "type" : "object",
+      "required" : [ "key", "value" ],
+      "properties" : {
+        "key" : {
+          "type" : "string"
+        },
+        "value" : {
+          "type" : "string"
+        }
+      }
+    },
+    "SpecialInstructionsCBO_inner" : {
+      "type" : "object",
+      "required" : [ "specialInstruction" ],
+      "properties" : {
+        "specialInstruction" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/SpecialInstructionsCBO_inner_specialInstruction"
+          }
+        }
+      }
+    },
+    "AcknowlegeOrder_DataArea" : {
+      "type" : "object",
+      "properties" : {
+        "Acknowledge" : {
+          "$ref" : "#/definitions/Acknowledge"
+        },
+        "Order" : {
+          "$ref" : "#/definitions/OrderResponseType"
+        }
+      }
+    },
+    "ResponseCriteria_ChangeStatus" : {
+      "type" : "object",
+      "properties" : {
+        "Description" : {
+          "type" : "string"
+        },
+        "Code" : {
+          "type" : "string"
+        }
+      }
+    },
+    "OrderResponseType_OrderIdentifier" : {
+      "type" : "object",
+      "properties" : {
+        "ExternalOrderID" : {
+          "type" : "string"
+        }
+      }
+    },
+    "OrderResponseType_StoreIdentifier" : {
+      "type" : "object",
+      "properties" : {
+        "UniqueID" : {
+          "type" : "string"
+        }
+      }
+    },
+    "ContextAttribute_Value" : {
+      "type" : "object",
+      "properties" : {
+        "Value" : {
+          "type" : "string",
+          "description" : "there are enums for few attributes eg. ProjectDuration"
+        }
+      }
+    },
+    "Inventory_sku" : {
+      "type" : "object",
+      "properties" : {
+        "itemNumber" : {
+          "type" : "string",
+          "description" : "ERP Stock Keeping Unit"
+        },
+        "stockingType" : {
+          "type" : "string"
+        },
+        "styleNumber" : {
+          "type" : "string"
+        },
+        "styleName" : {
+          "type" : "string"
+        },
+        "colorNumber" : {
+          "type" : "string"
+        },
+        "colorName" : {
+          "type" : "string"
+        },
+        "pattern" : {
+          "type" : "string"
+        },
+        "backing" : {
+          "type" : "string"
+        },
+        "size" : {
+          "type" : "string"
+        },
+        "option" : {
+          "type" : "string"
+        },
+        "grade" : {
+          "type" : "string"
+        }
+      }
+    },
+    "findUs" : {
+      "type" : "object",
+      "properties" : {
+        "postal_code" : {
+          "type" : "string"
+        },
+        "country" : {
+          "type" : "string"
+        },
+        "state" : {
+          "type" : "string"
+        },
+        "city" : {
+          "type" : "string"
+        }
+      }
+    }
+  }
+}

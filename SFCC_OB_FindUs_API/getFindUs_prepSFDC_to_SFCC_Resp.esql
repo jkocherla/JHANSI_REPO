@@ -1,0 +1,128 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CREATE COMPUTE MODULE getFindUs_prepSFDC_to_SFCC_Resp
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+
+		SET OutputRoot.JSON.Data.message = 'test';
+
+		DECLARE i INTEGER 1;
+
+		IF CARDINALITY(InputRoot.JSON.Data.FindaRep.User.Item[]) > 0 THEN
+			DECLARE inref REFERENCE TO InputRoot.JSON.Data.FindaRep.User.Item[1];
+			CREATE FIELD OutputRoot.JSON.Data.accountExecutive IDENTITY(JSON.Array)accountExecutive;
+
+			WHILE LASTMOVE(inref) DO
+
+				DECLARE userCompany CHARACTER '';
+				--DECLARE State_value CHARACTER '';
+				SET OutputRoot.JSON.Data.accountExecutive.Item[i].Image = inref.Profile_Photo_URL__c;
+				SET OutputRoot.JSON.Data.accountExecutive.Item[i].Type = inref.RepType;
+				--SET OutputRoot.JSON.Data.accountExecutive.Item[i].FirstName = SUBSTRING(inref.User_Name BEFORE ' ');
+				--SET OutputRoot.JSON.Data.accountExecutive.Item[i].LastName = SUBSTRING(inref.User_Name AFTER ' ');
+				SET OutputRoot.JSON.Data.accountExecutive.Item[i].FirstName = inref.FirstName;
+				SET OutputRoot.JSON.Data.accountExecutive.Item[i].LastName = inref.LastName;
+				SET OutputRoot.JSON.Data.accountExecutive.Item[i].PhoneNumber = inref.Phone;
+				SET OutputRoot.JSON.Data.accountExecutive.Item[i].EmailId = inref.Email;
+				SET OutputRoot.JSON.Data.accountExecutive.Item[i].Country = inref.Country;
+				SET OutputRoot.JSON.Data.accountExecutive.Item[i].Region = inref.Division;
+				--SET OutputRoot.JSON.Data.accountExecutive.Item[i].State = InputLocalEnvironment.JSON.Data.State__c;
+				SET OutputRoot.JSON.Data.accountExecutive.Item[i].State = inref.State__c;
+				--CREATE refArray REFERENCE TO OutputRoot.JSON.Data.(JSON.Array)accountRestrictionTransactions;
+
+
+				SET userCompany = inref.UserCompany;
+				IF userCompany IS NOT NULL and LENGTH(userCompany) > 0 THEN
+
+					DECLARE usercompany CHARACTER inref.UserCompany;
+					CALL Split(usercompany,Environment,',');
+					CREATE FIELD OutputRoot.JSON.Data.accountExecutive.Item[i].Tags IDENTITY (JSON.Array)Tags;
+					DECLARE RECORDCount INTEGER CARDINALITY(Environment.Split.Array[]);
+					DECLARE index INTEGER 1;
+					WHILE index <=RECORDCount DO
+						CREATE LASTCHILD OF OutputRoot.JSON.Data.accountExecutive.Item[i].Tags TYPE NameValue NAME 'Item' VALUE Environment.Split.Array[index];
+						set index= index+1;
+					END WHILE;
+
+				END IF;
+
+				SET i = i + 1;
+
+				MOVE inref NEXTSIBLING;
+
+			END WHILE;
+
+		END IF;
+
+		RETURN TRUE;
+	END;
+	CREATE PROCEDURE Split (IN S CHARACTER, IN Env REFERENCE, IN Delim CHARACTER)
+	BEGIN
+		DECLARE P INTEGER;
+		DECLARE Idx INTEGER 1;
+
+
+
+		SET Env.Split = NULL;
+
+
+
+		REPEAT
+			SET P = POSITION(Delim IN S);
+			IF P = 0 THEN
+				SET Env.Split.Array[Idx] = S;
+			ELSE
+				SET Env.Split.Array[Idx] = LEFT(S, P - 1);
+				SET S = SUBSTRING(S FROM P + LENGTH(Delim));
+				SET Idx = Idx + 1;
+			END IF;
+			UNTIL P = 0
+		END REPEAT;
+	END;
+END MODULE;

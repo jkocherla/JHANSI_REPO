@@ -1,0 +1,61 @@
+
+
+
+
+CREATE COMPUTE MODULE getFindUs_MockResponse
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		/*
+		{
+		"message": "string",
+		"accountExecutive": [
+		{
+		"Image": "external URL to image",
+		"Type": "Sales Rep",
+		"FirstName": "string",
+		"LastName": "string",
+		"PhoneNumber": "string",
+		"EmailId": "string", // must be email
+		"Country": "string",
+		"Region": "string",
+		"Tags": ["Interface", "Nora"]
+		}
+		]
+		}
+		*/
+
+		SET OutputRoot.JSON.Data.message = 'Success';
+		CREATE FIELD OutputRoot.JSON.Data.accountExecutive IDENTITY(JSON.Array)accountExecutive;
+
+		SET OutputRoot.JSON.Data.accountExecutive.Item[1].Image = 'https://dummy.com/myphot.jpg';
+
+		SET OutputRoot.JSON.Data.accountExecutive.Item[1].Type = 'Sales Rep';
+		SET OutputRoot.JSON.Data.accountExecutive.Item[1].FirstName = 'FirstFirstName';
+		SET OutputRoot.JSON.Data.accountExecutive.Item[1].LastName = 'FirstLastName';
+		SET OutputRoot.JSON.Data.accountExecutive.Item[1].PhoneNumber = '(302) 400 5000';
+		SET OutputRoot.JSON.Data.accountExecutive.Item[1].EmailId = 'larry.boyle@interface.com.invalid';
+		SET OutputRoot.JSON.Data.accountExecutive.Item[1].Country = 'US';
+		SET OutputRoot.JSON.Data.accountExecutive.Item[1].Region = 'Central Heartland';
+		CREATE FIELD OutputRoot.JSON.Data.accountExecutive.Item[1].Tags IDENTITY (JSON.Array)Tags;
+		CREATE LASTCHILD OF OutputRoot.JSON.Data.accountExecutive.Item[1].Tags TYPE NameValue NAME 'Item' VALUE 'Interface';
+		CREATE LASTCHILD OF OutputRoot.JSON.Data.accountExecutive.Item[1].Tags TYPE NameValue NAME 'Item' VALUE 'Nora';
+
+
+		SET OutputRoot.JSON.Data.accountExecutive.Item[2].Image = 'https://dummy.com/myphot.jpg';
+		SET OutputRoot.JSON.Data.accountExecutive.Item[2].Type = 'Sales Rep';
+		SET OutputRoot.JSON.Data.accountExecutive.Item[2].FirstName = 'SecondFirstName';
+		SET OutputRoot.JSON.Data.accountExecutive.Item[2].LastName = 'SecondLastName';
+		SET OutputRoot.JSON.Data.accountExecutive.Item[2].PhoneNumber = '(302) 400 5000';
+		SET OutputRoot.JSON.Data.accountExecutive.Item[2].EmailId = 'harry.heart@interface.com.invalid';
+		SET OutputRoot.JSON.Data.accountExecutive.Item[2].Country = 'US';
+		SET OutputRoot.JSON.Data.accountExecutive.Item[2].Region = 'Piedmont';
+
+		CREATE FIELD OutputRoot.JSON.Data.accountExecutive.Item[2].Tags IDENTITY (JSON.Array)Tags;
+		CREATE LASTCHILD OF OutputRoot.JSON.Data.accountExecutive.Item[2].Tags TYPE NameValue NAME 'Item' VALUE 'Interface';		
+		
+
+
+		RETURN TRUE;
+	END;
+
+END MODULE;

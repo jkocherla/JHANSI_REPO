@@ -1,0 +1,41 @@
+
+
+CREATE COMPUTE MODULE SFCCToSalesForce_findUsInputCatchHandler_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		SET OutputRoot.HTTPResponseHeader."Content-Type" = 'application/json';
+		SET OutputLocalEnvironment.Destination.HTTP.ReplyStatusCode = 500;
+		
+		DECLARE faultcode CHARACTER '';
+		DECLARE faultstring CHARACTER '';
+		SET faultcode = Environment.Variable.Fault.faultcode;
+		SET faultstring = Environment.Variable.Fault.faultstring;
+		IF LENGTH(faultcode) > 0 AND LENGTH(faultstring) > 0 THEN
+			SET OutputRoot.JSON.Data.errorCode = faultcode;
+			SET OutputRoot.JSON.Data.errorDesc = faultstring;
+		ELSEIF LENGTH(faultstring) > 0 THEN
+			SET OutputRoot.JSON.Data.errorCode = 'MW3002E';
+			SET OutputRoot.JSON.Data.errorDesc = faultstring;
+		ELSE
+			SET OutputRoot.JSON.Data.errorCode = 'MW1001E';
+			SET OutputRoot.JSON.Data.errorDesc = 'Unhandled MW Error';
+		END IF;
+		
+		
+		RETURN TRUE;
+	END;
+
+	CREATE PROCEDURE CopyMessageHeaders() BEGIN
+		DECLARE I INTEGER 1;
+		DECLARE J INTEGER;
+		SET J = CARDINALITY(InputRoot.*[]);
+		WHILE I < J DO
+			SET OutputRoot.*[I] = InputRoot.*[I];
+			SET I = I + 1;
+		END WHILE;
+	END;
+
+	CREATE PROCEDURE CopyEntireMessage() BEGIN
+		SET OutputRoot = InputRoot;
+	END;
+END MODULE;

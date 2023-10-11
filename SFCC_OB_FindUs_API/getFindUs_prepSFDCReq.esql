@@ -1,0 +1,74 @@
+
+/*
+Appconnect Endpoint :
+http://rhmwappdv1-edata:80/findARep?Zipcode__c='30339'&Country__c='USA'&State__c='GA'&User__r.Phone='(470) 281-8285'
+Appconnect Response :
+{
+{
+"FindaRep":{
+"User":[
+{
+"Id":"a4M8G000000HCQWUA4",
+"LastName":"Effler",
+"FirstName":"Robin",
+"Country":"USA",
+"Email":"robin.effler@nora.com.invalid",
+"Phone":"(470) 281-8285",
+"MobilePhone":"",
+"Profile_Photo_URL__c":"https://interfacecrm--qa--c.documentforce.com/profilephoto/005/F",
+"Division":"AMS",
+"UserCompany":"NORA",
+"RepType":"AE/AM"
+}
+]
+}
+}
+*/
+
+CREATE COMPUTE MODULE getFindUs_prepSFDCReq
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+
+		DECLARE postal_code, country, state, city CHARACTER '';
+		SET postal_code = InputRoot.JSON.Data.postal_code;
+		SET country = InputRoot.JSON.Data.country;
+		SET city = InputRoot.JSON.Data.city;
+		DECLARE inref REFERENCE TO InputRoot.JSON.Data;
+		-- SET state = InputRoot.JSON.Data.state;
+		-- SET state = InputRoot.JSON.Data.province;
+		IF inref.state IS NOT NULL THEN
+			SET state = InputRoot.JSON.Data.state;
+		ELSE
+			SET state = InputRoot.JSON.Data.province;
+		END IF;
+		IF postal_code IS NULL AND country IS NULL AND state IS NULL AND city IS NULL THEN
+
+			SET Environment.Variable.Fault.faultcode = 'MW1001E';
+			SET Environment.Variable.Fault.faultstring = 'At least one input (postal_code,country,state OR city) is required';
+
+			PROPAGATE TO TERMINAL 'Failure';
+			RETURN FALSE;
+
+		ELSE
+			-- SET OutputLocalEnvironment.Destination.HTTP.RequestLine.Method = 'GET';
+			-- SET OutputLocalEnvironment.Destination.HTTP.QueryString.Zipcode__c = ''''||postal_code||'''';
+			-- SET OutputLocalEnvironment.Destination.HTTP.QueryString.Country__c = ''''||country||'''';
+			-- SET OutputLocalEnvironment.Destination.HTTP.QueryString.State__c = ''''||state||'''';
+			-- SET OutputLocalEnvironment.Destination.HTTP.QueryString.City__c = ''''||city||'''';
+			-- SET OutputLocalEnvironment.Destination.HTTP.QueryString.IsActive__c = 'true';
+
+			SET OutputRoot.JSON.Data.Zipcode__c = CAST (postal_code as CHARACTER);
+			SET OutputRoot.JSON.Data.Country__c = country;
+			SET OutputRoot.JSON.Data.State__c = state;
+			SET OutputRoot.JSON.Data.City__c = city;
+			SET OutputRoot.JSON.Data.IsActive__c = 'true';
+			--SET OutputLocalEnvironment.JSON.Data.State__c = state;
+			
+			RETURN TRUE;
+
+		END IF;
+
+
+	END;
+
+END MODULE;

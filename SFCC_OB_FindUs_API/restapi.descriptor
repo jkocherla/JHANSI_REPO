@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:restapiDescriptor xmlns="http://com.ibm.etools.mft.descriptor.base" xmlns:ns2="http://com.ibm.etools.mft.descriptor.restapi" definitionType="swagger_20" definitionFile="pjain2-websitesvc-1.0.0-resolved (1).json" implementation="gen/SFCC_OB_FindUs_API.msgflow" https="false">
+    <ns2:operations>
+        <ns2:operation name="postFindUs" implementation="postFindUs.subflow"/>
+    </ns2:operations>
+    <ns2:errorHandlers>
+        <ns2:errorHandler type="CATCH" implementation="SFCCToSalesForce_findUsInputCatchHandler.subflow"/>
+        <ns2:errorHandler type="FAILURE" implementation="SFCCToSalesForce_findUsInputFailureHandler.subflow"/>
+        <ns2:errorHandler type="TIMEOUT" implementation="SFCCToSalesForce_findUsInputTimeoutHandler.subflow"/>
+    </ns2:errorHandlers>
+</ns2:restapiDescriptor>
