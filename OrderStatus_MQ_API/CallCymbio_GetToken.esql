@@ -1,0 +1,37 @@
+/*****************************************************************************
+* Component Name	: OrderStatus_MQ_API								 	 *
+* Flow Name			: StatusToCymbio.msgflow							 	 *
+* Subflow Name		: CallCymbio.subflow									 *
+* File Name  		: CallCymbio_GetToken.esql        		     	 		 *
+*                                                                            *
+* Description		: This is responsible to call common token module to get *
+*                     token from Cymbio										 *
+* 																			 *
+* ***************************Revision History*********************************
+* Author 					Date			Description						 *
+* ===============		=============	============================		 *
+* Prakash Chandra 		Mar-14-2022		Initial Code checkin				 * 
+*																			 *
+******************************************************************************/
+CREATE COMPUTE MODULE CallCymbio_GetToken
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		
+		--Declare variables
+		DECLARE refInput				REFERENCE TO InputRoot.JSON;
+		DECLARE cymbioReqBlob 			BLOB ASBITSTREAM(InputRoot.JSON);
+		DECLARE cymbioReq				CHARACTER BASE64ENCODE(cymbioReqBlob);
+		
+		-- Maintain original request parameters
+		SET Environment.Variables.RequestJSON 		= refInput; 
+		SET Environment.Variables.StatusReq			= cymbioReq;	
+		
+		--Call API Cache subflow to get API details from Global Cache.
+		SET Environment.cAPIType 	= 'CymbioTokenAPI1';
+		SET Environment.API			= NULL;		
+		PROPAGATE TO TERMINAL 'out1';
+		
+    	    	    	
+		RETURN TRUE;
+	END;
+END MODULE;

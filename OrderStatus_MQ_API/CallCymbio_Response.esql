@@ -1,0 +1,73 @@
+/*****************************************************************************
+* Component Name	: OrderStatus_MQ_API								 	 *
+* Flow Name			: StatusToCymbio.msgflow							 	 *
+* Subflow Name		: CallCymbio.subflow									 *
+* File Name  		: CallCymbio_Response.esql        		     	 		 *
+*                                                                            *
+* Description		: This is responsible to log response from Cymbio		 *
+* 																			 *
+* ***************************Revision History*********************************
+* Author 					Date			Description						 *
+* ===============		=============	============================		 *
+* Prakash Chandra 		Mar-14-2022		Initial Code checkin				 * 
+*																			 *
+******************************************************************************/
+CREATE COMPUTE MODULE CallCymbio_Response
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		
+		--Declare variables
+		DECLARE errorCode,errorMessage		CHARACTER;
+		DECLARE Ref_Env						REFERENCE TO Environment;
+		DECLARE cymbioRespPayloadBlob 		BLOB ASBITSTREAM(InputRoot.JSON);
+		DECLARE cymbioRespPayload			CHARACTER BASE64ENCODE(COALESCE(cymbioRespPayloadBlob,InputRoot.BLOB.BLOB));
+		DECLARE cymbioHttpHeaderBlob 		BLOB ASBITSTREAM(InputRoot.HTTPResponseHeader);
+		DECLARE cymbioHttpHeader			CHARACTER CAST(cymbioHttpHeaderBlob AS CHAR CCSID 1208);	
+		
+		--Capture response received from Provider
+		SET errorCode		= InputRoot.HTTPResponseHeader."X-Original-HTTP-Status-Code";
+		
+		--Set Environment variables to be sent for craeting Audit Message
+		SET Environment.Variables.AuditMessage 		= NULL;
+		
+		IF errorCode = '200' THEN
+			SET Environment.Variables.ErrorInfo.Code 		= '0';
+		    SET Environment.Variables.ErrorInfo.Category 	= 'SUCCESS';
+		    SET Environment.Variables.ErrorInfo.Description = 'Status Successfully sent to Cymbio for Order# -'|| Environment.Variables.webOrderNumber;	
+		ELSE 
+			IF EXISTS(InputRoot.BLOB.BLOB[]) THEN 
+				CREATE LASTCHILD OF OutputLocalEnvironment DOMAIN('JSON') PARSE(InputRoot.BLOB.BLOB);
+--				IF EXISTS(OutputLocalEnvironment.JSON.Data[]) THEN
+--					SET errorMessage	= COALESCE(OutputLocalEnvironment.JSON.Data.message, COALESCE(OutputLocalEnvironment.JSON.Data.Message,''));
+--				ELSE
+--					SET errorMessage	= '';
+--				END IF;	
+			ELSE
+				SET errorMessage		= 'Check errorcode';
+			END IF;	
+			
+	    	SET Environment.Variables.ErrorInfo.Code 		= '1';
+	    	SET Environment.Variables.ErrorInfo.Category 	= 'FAILURE'; 
+	    	SET Environment.Variables.ErrorInfo.Description = 'Error sending status to Cymbio for Order# - ' || Environment.Variables.webOrderNumber ||' - '|| COALESCE(errorCode,' ') || ' ' ||COALESCE(errorMessage,''); 
+	    END IF;	
+		
+		SET Environment.Variables.Info.Header 		= cymbioHttpHeader;
+		SET Environment.Variables.Info.Payload 		= cymbioRespPayload;
+		SET Environment.Variables.Info.Priority 	= '0';
+			
+		MOVE Ref_Env TO Environment.Variables;
+		--Call Audit procedure to create Audit Message and send it to Queue
+	    CALL com.nb.esb.iib.cmn.logging.PROC_Audit(Ref_Env, 'RESPONSE', 'PROVIDER_TO_IIB','Cymbio_StatusUpdate');
+	    SET OutputRoot.JSON.Data.AuditMessage 	= Ref_Env.AuditMessage;
+		PROPAGATE TO LABEL 'ToAudit';	
+		
+		SET OutputLocalEnvironment = NULL;
+		
+		--Throw error if error response is received from CA
+		IF errorCode <> '200' THEN
+			THROW USER EXCEPTION MESSAGE 500 VALUES(Environment.Variables.ErrorInfo.Description);	
+		END IF;	
+		
+		RETURN TRUE;
+	END;
+END MODULE;

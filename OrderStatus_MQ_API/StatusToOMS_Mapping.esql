@@ -1,0 +1,81 @@
+/*****************************************************************************
+* Component Name	: OrderStatus_MQ_API								 	 *
+* Flow Name			: StatusToOMS.msgflow								 	 *
+* File Name  		: StatusToOMS_Mapping.esql        		     	 		 *
+*                                                                            *
+* Description		: This is responsible to create message o be sent to OMS *
+* 																			 *
+* ***************************Revision History*********************************
+* Author 					Date			Description						 *
+* ===============		=============	============================		 *
+* Prakash Chandra 		Mar-14-2022		Initial Code checkin				 * 
+*																			 *
+******************************************************************************/
+DECLARE TWShippingCredit EXTERNAL CHARACTER '' ;
+------------------------------------------------------------------------------
+CREATE COMPUTE MODULE StatusToOMS_Mapping
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		
+		--Declare Variables
+		DECLARE DTT_OMS_URL,DTT_OMS_SHAREDKEY								CHARACTER;
+		DECLARE apiController,key,returnId,returnType,shippingCredit 		CHARACTER;
+		DECLARE statusDetail 												REFERENCE TO InputRoot.JSON.Data;
+		DECLARE cSiteCode 													CHARACTER Environment.cSiteCode;
+		DECLARE X 															INTEGER 1;
+		DECLARE UPC,rtnReason												CHARACTER ' ';
+		
+		SET OutputRoot.Properties = InputRoot.Properties;
+		
+		--Call API Cache subflow to get API details .
+		SET Environment.cAPIType 	= 'DeckCommerceNBStatusUpdate';
+		SET Environment.API 		= NULL;
+		PROPAGATE TO TERMINAL 'out1';
+		
+		SET DTT_OMS_SHAREDKEY 	= Environment.API.apiSecret;
+		SET DTT_OMS_URL 		= Environment.API.apiURL;	
+		
+		--Creating Output JSON message to be sent to OMS.
+		SET OutputRoot.JSON.Data.OrderNumber 			= SUBSTRING(statusDetail.Item[X].externalOrderNumber BEFORE '-');
+		SET Environment.Variables.OrderNumber			= CAST(statusDetail.Item[X].externalOrderNumber AS CHARACTER);
+		
+		CREATE FIELD OutputRoot.JSON.Data.Items IDENTITY(JSON.Array)Items;
+		
+		FOR count AS statusDetail.Item[] DO		
+			--Get ReturnReasonId, ReturnType from attributes
+			SET returnId 		= statusDetail.Item[X].attributes.Item[2].value;
+			SET returnType 		= statusDetail.Item[X].attributes.Item[3].value;
+			
+			IF (cSiteCode = 'NBTW') THEN
+				SET shippingCredit 	= TWShippingCredit;
+			END IF;
+				
+			SET OutputRoot.JSON.Data.Items.Item[X].GTIN 			= statusDetail.Item[X].itemBarcode;
+			SET OutputRoot.JSON.Data.Items.Item[X].ReturnReasonId 	= CAST(TRIM(returnId) AS INTEGER);
+			SET OutputRoot.JSON.Data.Items.Item[X].ReturnTypeId 	= CAST(TRIM(returnType) AS INTEGER);
+			SET OutputRoot.JSON.Data.Items.Item[X].Quantity 		= statusDetail.Item[X].quantity;
+			
+			SET UPC			= CAST(statusDetail.Item[X].UPC AS CHARACTER) || ' ' || UPC;
+			SET rtnReason	= CAST(returnId AS CHARACTER) || ' ' || rtnReason;
+			
+			SET X = X + 1;
+			
+		END FOR;
+		
+		SET OutputRoot.JSON.Data.TimestampUTC 			= CAST(CURRENT_GMTTIMESTAMP AS CHARACTER FORMAT 'M/d/yyyy HH:mm a');
+		SET OutputRoot.JSON.Data.SiteCode 				= cSiteCode;
+		SET apiController 								= SUBSTRING(LOWER(DTT_OMS_URL) AFTER '.net/') || OutputRoot.JSON.Data.TimestampUTC || DTT_OMS_SHAREDKEY;
+		SET key 										= com.nb.esb.iib.cmn.util.HashCon(apiController);
+		SET OutputRoot.JSON.Data.VerificationKey 		= UPPER(key); 
+		IF ((shippingCredit IS NOT NULL) OR (shippingCredit <> ' ')) THEN
+			SET OutputRoot.JSON.Data.ReturnShippingCredit 	= CAST(TRIM(shippingCredit) AS DECIMAL);
+		END IF; 
+		
+		SET Environment.Variables.UPC			= UPC;
+		SET Environment.Variables.rtnReason		= rtnReason;
+		
+		
+		RETURN TRUE;
+	END;
+
+END MODULE;

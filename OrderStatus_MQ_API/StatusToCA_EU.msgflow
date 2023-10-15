@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:CallChannelAdvisor.subflow="CallChannelAdvisor.subflow" xmlns:ComIbmCompute.msgnode="ComIbmCompute.msgnode" xmlns:ComIbmLabel.msgnode="ComIbmLabel.msgnode" xmlns:ComIbmMQInput.msgnode="ComIbmMQInput.msgnode" xmlns:ComIbmMQOutput.msgnode="ComIbmMQOutput.msgnode" xmlns:ComIbmRouteToLabel.msgnode="ComIbmRouteToLabel.msgnode" xmlns:UpdateRCVMongoTable.subflow="UpdateRCVMongoTable.subflow" xmlns:com_nb_esb_iib_cmn_errorhandling_CommonErrorHandling.subflow="com/nb/esb/iib/cmn/errorhandling/CommonErrorHandling.subflow"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:eflow="http://www.ibm.com/wbi/2005/eflow" xmlns:utility="http://www.ibm.com/wbi/2005/eflow_utility" nsURI="StatusToCA_EU.msgflow" nsPrefix="StatusToCA_EU.msgflow">
+  <eClassifiers xmi:type="eflow:FCMComposite" name="FCMComposite_1">
+    <eSuperTypes href="http://www.ibm.com/wbi/2005/eflow#//FCMBlock"/>
+    <eStructuralFeatures xmi:type="ecore:EAttribute" xmi:id="Property.ENABLE_RETRY" name="ENABLE_RETRY" lowerBound="1" defaultValueLiteral="YES">
+      <eType xmi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xmi:type="ecore:EAttribute" xmi:id="Property.MAX_RETRY_COUNT" name="MAX_RETRY_COUNT" lowerBound="1" defaultValueLiteral="3">
+      <eType xmi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xmi:type="ecore:EAttribute" xmi:id="Property.RETRY_Q" name="RETRY_Q" lowerBound="1" defaultValueLiteral="ORDER.STATUS.TO.CA.EU.IN">
+      <eType xmi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eStructuralFeatures>
+    <translation xmi:type="utility:TranslatableString" key="StatusToCA_EU" bundleName="StatusToCA_EU" pluginId="OrderStatus_MQ_API"/>
+    <colorGraphic16 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/OrderStatus_MQ_API/icons/full/obj16/StatusToCA_EU.gif"/>
+    <colorGraphic32 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/OrderStatus_MQ_API/icons/full/obj30/StatusToCA_EU.gif"/>
+    <composition>
+      <nodes xmi:type="ComIbmMQInput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_1" location="25,204" queueName="ORDER.STATUS.TO.CA.EU.IN" messageDomainProperty="JSON">
+        <translation xmi:type="utility:ConstantString" string="MQ Input"/>
+      </nodes>
+      <nodes xmi:type="ComIbmLabel.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_2" location="416,389" labelName="ToAudit">
+        <translation xmi:type="utility:ConstantString" string="ToAudit"/>
+      </nodes>
+      <nodes xmi:type="ComIbmMQOutput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_3" location="536,389" queueName="COMMON.LOGGING.IN" transactionMode="no" persistenceMode="yes" validateMaster="none">
+        <translation xmi:type="utility:ConstantString" string="MQ_Out_Audit"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_4" location="158,204" computeExpression="esql://routine/#StatusToCA_EU_Start.Main" computeMode="destinationAndMessage">
+        <translation xmi:type="utility:ConstantString" string="Start"/>
+      </nodes>
+      <nodes xmi:type="com_nb_esb_iib_cmn_errorhandling_CommonErrorHandling.subflow:FCMComposite_1" xmi:id="FCMComposite_1_5" location="96,82">
+        <translation xmi:type="utility:ConstantString" string="CommonErrorHandling"/>
+      </nodes>
+      <nodes xmi:type="ComIbmRouteToLabel.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_6" location="238,205">
+        <translation xmi:type="utility:ConstantString" string="Route To Label"/>
+      </nodes>
+      <nodes xmi:type="ComIbmLabel.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_7" location="415,150" labelName="RTN">
+        <translation xmi:type="utility:ConstantString" string="RTN"/>
+      </nodes>
+      <nodes xmi:type="ComIbmLabel.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_8" location="411,64" labelName="ASN">
+        <translation xmi:type="utility:ConstantString" string="ASN"/>
+      </nodes>
+      <nodes xmi:type="ComIbmLabel.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_9" location="419,232" labelName="CNR">
+        <translation xmi:type="utility:ConstantString" string="CNR"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_10" location="519,64" computeExpression="esql://routine/#StatusToCA_EU_ASN_Mapping.Main">
+        <translation xmi:type="utility:ConstantString" string="ASN_Mapping"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_11" location="503,189" computeExpression="esql://routine/#StatusToCA_EU_RTN_CNR_Mapping.Main">
+        <translation xmi:type="utility:ConstantString" string="RTN_CNR_Mapping"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_12" location="719,65" computeExpression="esql://routine/#StatusToCA_EU_End.Main">
+        <translation xmi:type="utility:ConstantString" string="LogResponse"/>
+      </nodes>
+      <nodes xmi:type="CallChannelAdvisor.subflow:FCMComposite_1" xmi:id="FCMComposite_1_13" location="694,190">
+        <translation xmi:type="utility:ConstantString" string="CallChannelAdvisor"/>
+      </nodes>
+      <nodes xmi:type="ComIbmLabel.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_14" location="420,307" labelName="RCV">
+        <translation xmi:type="utility:ConstantString" string="RCV"/>
+      </nodes>
+      <nodes xmi:type="UpdateRCVMongoTable.subflow:FCMComposite_1" xmi:id="FCMComposite_1_15" location="504,306">
+        <translation xmi:type="utility:ConstantString" string="UpdateRCVMongoTable"/>
+      </nodes>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_1" targetNode="FCMComposite_1_3" sourceNode="FCMComposite_1_2" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_2" targetNode="FCMComposite_1_4" sourceNode="FCMComposite_1_1" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_3" targetNode="FCMComposite_1_5" sourceNode="FCMComposite_1_1" sourceTerminalName="OutTerminal.failure" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_4" targetNode="FCMComposite_1_5" sourceNode="FCMComposite_1_1" sourceTerminalName="OutTerminal.catch" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_5" targetNode="FCMComposite_1_6" sourceNode="FCMComposite_1_4" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_6" targetNode="FCMComposite_1_10" sourceNode="FCMComposite_1_8" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_7" targetNode="FCMComposite_1_11" sourceNode="FCMComposite_1_7" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_8" targetNode="FCMComposite_1_11" sourceNode="FCMComposite_1_9" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_9" targetNode="FCMComposite_1_12" sourceNode="FCMComposite_1_10" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_10" targetNode="FCMComposite_1_12" sourceNode="FCMComposite_1_11" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_11" targetNode="FCMComposite_1_13" sourceNode="FCMComposite_1_10" sourceTerminalName="OutTerminal.out1" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_12" targetNode="FCMComposite_1_13" sourceNode="FCMComposite_1_11" sourceTerminalName="OutTerminal.out1" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_13" targetNode="FCMComposite_1_15" sourceNode="FCMComposite_1_14" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.Input"/>
+    </composition>
+    <propertyOrganizer>
+      <propertyDescriptor groupName="Group.Basic" configurable="true" userDefined="true" describedAttribute="Property.ENABLE_RETRY">
+        <propertyName xmi:type="utility:TranslatableString" key="Property.ENABLE_RETRY" bundleName="StatusToCA_EU" pluginId="OrderStatus_MQ_API"/>
+        <propertyDescriptor groupName="Group.Basic" configurable="true" userDefined="true" describedAttribute="Property.MAX_RETRY_COUNT">
+          <propertyName xmi:type="utility:TranslatableString" key="Property.MAX_RETRY_COUNT" bundleName="StatusToCA_EU" pluginId="OrderStatus_MQ_API"/>
+          <propertyDescriptor groupName="Group.Basic" configurable="true" userDefined="true" describedAttribute="Property.RETRY_Q">
+            <propertyName xmi:type="utility:TranslatableString" key="Property.RETRY_Q" bundleName="StatusToCA_EU" pluginId="OrderStatus_MQ_API"/>
+          </propertyDescriptor>
+        </propertyDescriptor>
+      </propertyDescriptor>
+    </propertyOrganizer>
+    <stickyBoard/>
+  </eClassifiers>
+</ecore:EPackage>

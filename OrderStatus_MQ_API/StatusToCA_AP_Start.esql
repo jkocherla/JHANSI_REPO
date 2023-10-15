@@ -1,0 +1,99 @@
+/*****************************************************************************
+* Component Name	: OrderStatus_MQ_API								 	 *
+* Flow Name			: StatusToCA_EU.msgflow								 	 *
+* File Name  		: StatusToCA_AP_Start.esql        		     	 		 *
+*                                                                            *
+* Description		: This is responsible to route status to proper 	 	 *
+*                      destination sublfow and logs the same				 *
+* 																			 *
+* ***************************Revision History*********************************
+* Author 					Date			Description						 *
+* ===============		=============	============================		 *
+* Prakash Chandra 		Mar-14-2022		Initial Code checkin				 * 
+* Devraj Mukherjee		Aug-06-2022		Retry Code							 *
+******************************************************************************/
+--Decalre UDP Variables
+DECLARE ENABLE_RETRY 		EXTERNAL CHARACTER '';
+DECLARE MAX_RETRY_COUNT		EXTERNAL INTEGER 1;
+DECLARE RETRY_Q				EXTERNAL CHARACTER '';
+
+CREATE COMPUTE MODULE StatusToCA_AP_Start
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		
+		--Declare variables
+		DECLARE Ref_Env		   				REFERENCE TO Environment;
+		DECLARE InputData 					REFERENCE TO InputRoot;
+		DECLARE refInput					REFERENCE TO InputRoot.JSON.Data;
+		DECLARE cLabelCode 					CHARACTER;
+		DECLARE httpHeaderBlob 				BLOB ASBITSTREAM(InputRoot.HTTPInputHeader);
+		DECLARE httpHeader					CHARACTER CAST(httpHeaderBlob AS CHAR CCSID 1208);
+		DECLARE httpPayloadBlob 			BLOB ASBITSTREAM(InputRoot.JSON);
+		DECLARE httpPayload					CHARACTER BASE64ENCODE(httpPayloadBlob);
+		DECLARE Label						CHARACTER;
+		DECLARE	retryCount					INTEGER;
+		DECLARE	legName						CHARACTER 'CONSUMER_TO_IIB';
+		
+		--Set Environment variables to be used for retry in error handling subflow
+		SET Environment.Variables.isRetry			= ENABLE_RETRY;
+		SET Environment.Variables.retryQueue		= RETRY_Q;
+		SET Environment.Variables.retryCount		= MAX_RETRY_COUNT;
+		
+		--Store SiteCode in Environment variables
+			SET Environment.cSiteCode 	= InputRoot.MQRFH2.usr.Info.region;
+			SET Environment.Region		= InputRoot.MQRFH2.usr.Info.siteCode;
+		--check the retry count value and logs it if its a retry message
+		IF EXISTS(InputRoot.MQRFH2.usr[]) THEN
+			SET retryCount				= CAST(InputRoot.MQRFH2.usr.RetryInfo.RetryCount AS INTEGER);	
+			SET legName					= 'RETRY_' || CAST(retryCount AS CHARACTER) || '_TO_IIB';
+		END IF;
+		
+		--Set Environment variables to create Audit messgae
+		SET Environment.Variables.Info.UUID					= UUIDASCHAR;
+		SET Environment.Variables.Info.SubflowName 			= 'OrderStatusToCA_AP';
+		IF InputRoot.MQMD.CorrelId IN('000000000000000000000000000000000000000000000000','', NULL) THEN
+			SET Environment.Variables.Info.CorrelId = CAST(InputRoot.MQMD.MsgId AS BLOB) ;
+		ELSE
+			SET Environment.Variables.Info.CorrelId = CAST(InputRoot.MQMD.CorrelId AS BLOB) ;
+		END IF;
+		SET Environment.Variables.Info.PONumber 			= CAST(refInput.Item[1].orderNumber AS CHARACTER);
+		SET Environment.Variables.Info.WebOrderNumber 		= CAST(refInput.Item[1].externalOrderNumber AS CHARACTER);
+		SET Environment.Variables.Info.AuroraOrderNumber    = CAST(refInput.Item[1].erpOrderNumber AS CHARACTER);
+		SET Environment.Variables.Info.KeyData 				= 'UPC - '||CAST(refInput.UPC AS CHARACTER) || ' | Status - ' || CAST(refInput.status AS CHARACTER);
+		SET Environment.Variables.Info.SiteCode 			= Environment.cSiteCode;
+		SET Environment.Variables.Info.Header 				= NULL;
+		SET Environment.Variables.Info.Payload 				= httpPayload;
+		SET Environment.Variables.Info.Priority 			= '0';
+		MOVE Ref_Env TO Environment.Variables;
+		
+		--Call Audit procedure to create Audit Message and send it to Queue
+       	CALL com.nb.esb.iib.cmn.logging.PROC_Audit(Ref_Env, 'REQUEST', 'CONSUMER_TO_IIB','Start');
+       	SET OutputRoot.JSON.Data.AuditMessage = Ref_Env.AuditMessage;
+		PROPAGATE TO LABEL 'ToAudit';	
+		
+		--Perform basic validations on the incoming JSON message
+		IF NOT EXISTS(InputRoot.JSON.Data[]) THEN
+			THROW USER EXCEPTION MESSAGE 400 VALUES('Bad Request, Missing payload');
+		END IF;	
+		
+		--Validate the site Code and Warehouse are not blank or Null
+		IF (Environment.cSiteCode IS NULL) OR (Environment.cSiteCode = '') THEN
+			THROW USER EXCEPTION MESSAGE 417 VALUES('Validation Error, siteCode is missing');
+		END IF;	
+		
+		--Get Status code to route to propper lable
+		SET Label = refInput.Item[1].status;
+		
+		--Validate the status is not blank or Null
+		IF (Label IS NULL) OR (Label = '') THEN
+			THROW USER EXCEPTION MESSAGE 417 VALUES('Validation Error, Invalid order status received - ' || Label );
+		END IF;	
+		
+		SET OutputRoot		= InputData;	
+		
+		SET OutputLocalEnvironment.Destination.RouterList.DestinationData[1].labelName = Label;	
+		
+		RETURN TRUE;
+	END;
+
+END MODULE;

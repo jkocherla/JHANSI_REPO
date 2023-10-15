@@ -1,0 +1,62 @@
+/*****************************************************************************
+* Component Name	: OrderStatus_MQ_API								 	 *
+* Flow Name			: StatusToCymbio.msgflow							 	 *
+* Subflow Name		: CallCymbio.subflow									 *
+* File Name  		: CallCymbio_Request.esql        		     	 		 *
+*                                                                            *
+* Description		: This is responsible to send request to Cymbio			 *
+* 																			 *
+* ***************************Revision History*********************************
+* Author 					Date			Description						 *
+* ===============		=============	============================		 *
+* Prakash Chandra 		Mar-14-2022		Initial Code checkin				 * 
+*																			 *
+******************************************************************************/
+CREATE COMPUTE MODULE CallCymbio_Request
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+
+		--Declare Variables
+		DECLARE cymbioURL	 		CHARACTER;
+		DECLARE Ref_Env				REFERENCE TO Environment;
+		
+		--Call API cache subflow to get api details from Global cache
+		SET Environment.cAPIType 	= 'CymbioBaseAPI1';
+		SET Environment.API 		= NULL;
+		PROPAGATE TO TERMINAL 'out1';
+
+		--Create URL of Cymbio			
+		SET cymbioURL = Environment.API.apiURL|| 'status';
+		
+		--Set Environment variables to create Audit messagae
+		SET Environment.Variables.AuditMessage 				= NULL;
+		SET Environment.Variables.Info.KeyData 				= 'Status - '||COALESCE(Environment.Variables.Status,'')||' | UPC List - ' || COALESCE(Environment.Variables.UPC,' ');
+		SET Environment.Variables.Info.Header 				= 'URL - '||cymbioURL || ' | Authorization Header - Bearer' ||Environment.Variables.cymbioAuthToken;
+		SET Environment.Variables.Info.Payload 				= Environment.Variables.StatusReq;
+		SET Environment.Variables.ErrorInfo.Code 			= NULL;
+	    SET Environment.Variables.ErrorInfo.Category 		= NULL;
+	    SET Environment.Variables.ErrorInfo.Description 	= NULL;
+		SET Environment.Variables.Info.Priority 			= '0';
+		MOVE Ref_Env TO Environment.Variables;
+		
+		--Call Audit procedure to create Audit Message and send it to Queue
+       	CALL com.nb.esb.iib.cmn.logging.PROC_Audit(Ref_Env, 'REQUEST', 'IIB_TO_PROVIDER','Cymbio_StatusUpdate');
+       	SET OutputRoot.JSON.Data.AuditMessage = Ref_Env.AuditMessage;
+		PROPAGATE TO LABEL 'ToAudit';	
+		
+		--Get approiate Request Based on Data Needed
+		SET OutputRoot.Properties										= NULL;
+		SET OutputRoot.Properties.CodedCharSetId 						= 1208;
+		SET OutputRoot.Properties.ContentType 							= 'application/json;charset=UTF-8';	
+		SET OutputRoot.HTTPRequestHeader."Authorization" 				= 'Bearer '|| Environment.Variables.cymbioAuthToken;		
+		SET OutputRoot.HTTPRequestHeader."Content-Type" 				= 'application/json';
+		SET OutputRoot.HTTPRequestHeader."X-Trace-Id"					= SUBSTRING(SUBSTRING(CAST(Environment.Variables.Info.CorrelId AS CHARACTER) AFTER 'X''') BEFORE '''');
+		SET OutputLocalEnvironment.Destination.HTTP.RequestLine.Method 	= 'POST';
+		SET OutputLocalEnvironment.Destination.HTTP.RequestURL 			= cymbioURL;
+--		SET OutputRoot.JSON 											= Environment.Variables.RequestJSON;
+		SET OutputRoot.JSON.Data 										= Environment.Variables.RequestJSON.Data;
+		CREATE FIELD OutputRoot.JSON.Data IDENTITY(JSON.Array)Data;
+		
+		RETURN TRUE;
+	END;
+END MODULE;

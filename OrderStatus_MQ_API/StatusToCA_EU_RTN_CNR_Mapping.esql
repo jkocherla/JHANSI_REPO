@@ -1,0 +1,80 @@
+/*****************************************************************************
+* Component Name	: OrderStatus_MQ_API								 	 *
+* Flow Name			: StatusToCA_EU.msgflow								 	 *
+* File Name  		: StatusToCA_EU_RTN_CNR_Mapping.esql	     	 		 *
+*                                                                            *
+* Description		: This is responsible to create Output messgage to send  *
+*                     to CA.												 *
+* 																			 *
+* ***************************Revision History*********************************
+* Author 					Date			Description						 *
+* ===============		=============	============================		 *
+* Prakash Chandra 		Mar-14-2022		Initial Code						 * 
+*																			 *
+******************************************************************************/
+CREATE COMPUTE MODULE StatusToCA_EU_RTN_CNR_Mapping
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		
+		--Declare variables
+		DECLARE CurrTime 		CHARACTER CAST(CURRENT_TIME AS CHARACTER FORMAT 'HHmmssssssss');
+		DECLARE StatusEvent 	REFERENCE TO InputRoot.JSON.Data;
+		DECLARE X 				INTEGER 1;
+		
+		FOR count AS StatusEvent.Item[] DO
+			
+			SET Environment.Variables.SuccessFlag 			= FALSE;
+			SET Environment.caorder 						= StatusEvent.Item[X].externalOrderNumber;
+			SET Environment.Variables.status				= CAST(StatusEvent.Item[X].status AS CHARACTER);
+			
+			IF LENGTH(CAST(StatusEvent.Item[X].lineId AS CHAR)) = 5 THEN
+				SET Environment.caline = StatusEvent.Item[X].lineId;
+			ELSEIF LENGTH(CAST(StatusEvent.Item[X].lineId AS CHAR)) = 4 THEN
+				SET Environment.caline = CAST(StatusEvent.Item[X].lineId AS CHAR);
+				SET Environment.caline =  '0' || Environment.caline;
+			ELSEIF LENGTH(CAST(StatusEvent.Item[X].lineId AS CHAR)) = 3 THEN
+				SET Environment.caline = CAST(StatusEvent.Item[X].lineId AS CHAR);
+				SET Environment.caline =  '00' || Environment.caline;
+			ELSEIF LENGTH(CAST(StatusEvent.Item[X].lineId AS CHAR)) = 2 THEN
+				SET Environment.caline = CAST(StatusEvent.Item[X].lineId AS CHAR);
+				SET Environment.caline =  '000' || Environment.caline;
+			ELSEIF LENGTH(CAST(StatusEvent.Item[X].lineId AS CHAR)) = 1 THEN
+				SET Environment.caline = CAST(StatusEvent.Item[X].lineId AS CHAR);
+				SET Environment.caline =  '0000' || Environment.caline;
+			ELSE
+				SET Environment.caline =  '00000';
+			END IF;
+			SET Environment.Variables.requesttype = 'GetOrderDetailRequest';
+			
+			PROPAGATE TO TERMINAL 'out1';
+			
+			IF Environment.Variables.SuccessFlag = TRUE THEN
+				IF StatusEvent.Item[X].status = 'CNR' THEN
+				IF SUBSTRING(StatusEvent.Item[X].attributes.Item[1].value BEFORE '-') = 'Z8' THEN
+					SET OutputRoot.JSON.Data.Reason = 'ShippingAddressUndeliverable';
+				ELSE
+					SET OutputRoot.JSON.Data.Reason = 'ItemNotAvailable';
+				END IF;
+			ELSEIF StatusEvent.Item[X].status = 'RTN' THEN
+				SET OutputRoot.JSON.Data.Reason = 'CustomerReturnedItem';
+			END IF;
+			
+			SET OutputRoot.JSON.Data.SellerAdjustmentID = StatusEvent.Item[X].orderNumber || CurrTime;
+			SET OutputRoot.JSON.Data.Quantity 			= StatusEvent.Item[X].quantity;
+			
+			SET Environment.Variables.requesttype = 'ReturnCancelRequest';
+			PROPAGATE TO TERMINAL 'out1';
+			ELSE
+				RETURN FALSE;
+			END IF;		
+
+			SET X = X + 1;
+		END FOR;
+		
+		--Send final response back to consumer
+		SET OutputRoot.JSON.Data = Environment.response;
+		
+		RETURN TRUE;
+	END;
+
+END MODULE;

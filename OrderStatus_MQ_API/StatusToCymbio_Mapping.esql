@@ -1,0 +1,54 @@
+/*****************************************************************************
+* Component Name	: OrderStatus_MQ_API								 	 *
+* Flow Name			: StatusToCymbio.msgflow							 	 *
+* File Name  		: StatusToCymbio_Start.esql        		     	 		 *
+*                                                                            *
+* Description		: This is responsible to route status to proper 	 	 *
+*                      destination sublfow and logs the same				 *
+* 																			 *
+* ***************************Revision History*********************************
+* Author 					Date			Description						 *
+* ===============		=============	============================		 *
+* Prakash Chandra 		Mar-14-2022		Initial Code checkin				 * 
+*																			 *
+******************************************************************************/
+CREATE COMPUTE MODULE StatusToCymbio_Mapping
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+	
+		--Declare variables
+		DECLARE StatusEvent 	REFERENCE TO InputRoot.JSON.Data;		
+		DECLARE X 				INTEGER 1;
+		DECLARE UPC,Status		CHARACTER ' ';
+		
+		FOR count AS StatusEvent.Item[] DO
+			
+			SET OutputRoot.JSON.Data.Value[X].orderNumber 			= StatusEvent.Item[X].externalOrderNumber;
+			SET Environment.Variables.webOrderNumber				= CAST(StatusEvent.Item[X].externalOrderNumber AS CHARACTER);
+			SET OutputRoot.JSON.Data.Value[X].ConsumerlineId 		= StatusEvent.Item[X].lineId;
+			--SET OutputRoot.JSON.Data.Value[X].UPC 					= StatusEvent.Item[X].UPC;
+			SET OutputRoot.JSON.Data.Value[X].UPC 					= StatusEvent.Item[X].itemBarcode;
+			SET OutputRoot.JSON.Data.Value[X].Quantity 				= StatusEvent.Item[X].quantity;
+			SET OutputRoot.JSON.Data.Value[X].status 				= StatusEvent.Item[X].status;
+			SET OutputRoot.JSON.Data.Value[X].dateTime 				= StatusEvent.Item[X].dateTime;
+			
+			SET UPC		= CAST(StatusEvent.Item[X].UPC AS CHARACTER)||' '||UPC;
+			SET Status	= CAST(StatusEvent.Item[X].status AS CHARACTER) || ' ' || Status;
+			
+			IF StatusEvent.Item[X].attributes.Item[1].name <> ' ' THEN		
+				SET OutputRoot.JSON.Data.Value[X].attributes.name[1] 	= StatusEvent.Item[X].attributes.Item[1].name;
+				SET OutputRoot.JSON.Data.Value[X].attributes.value[1] 	= StatusEvent.Item[X].attributes.Item[1].value;
+			END IF;				
+			
+			SET X = X + 1;
+		END FOR;
+		
+		SET Environment.Variables.UPC		= UPC;
+		SET Environment.Variables.Status	= Status;
+		
+		--CREATE FIELD OutputRoot.JSON.Data IDENTITY(JSON.Array)Data;
+
+		RETURN TRUE;
+	END;
+
+END MODULE;

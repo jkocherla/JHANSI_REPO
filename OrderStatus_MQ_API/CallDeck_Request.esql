@@ -1,0 +1,48 @@
+/*****************************************************************************
+* Component Name	: OrderStatus_MQ_API								 	 *
+* Flow Name			: StatusToODeck.msgflow								 	 *
+* Subflow Name		: CallDeck.subflow									 	 *
+* File Name  		: CallDeck_Request.esql	        		     	 		 *
+*                                                                            *
+* Description		: This is responsible to send request to Deck			 *
+* 																			 *
+* ***************************Revision History*********************************
+* Author 					Date			Description						 *
+* ===============		=============	============================		 *
+* Prakash Chandra 		Mar-14-2022		Initial Code checkin				 * 
+*																			 *
+******************************************************************************/
+CREATE COMPUTE MODULE CallDeck_Request
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		
+		--Declare Variables
+		DECLARE Ref_Env		   			REFERENCE TO Environment;
+		DECLARE refInput				REFERENCE TO InputRoot.JSON;
+		DECLARE omsReqBlob 				BLOB ASBITSTREAM(InputRoot.JSON);
+		DECLARE omsReq					CHARACTER BASE64ENCODE(omsReqBlob);
+		
+		--Set Environment variables to create Audit message
+		SET Environment.Variables.AuditMessage 			= NULL;
+		SET Environment.Variables.Info.KeyData 			= 'SKU List - ' || COALESCE(Environment.Variables.SKU,'') || ' | Status - '|| COALESCE(Environment.Variables.Status,'');
+		SET Environment.Variables.Info.Header 			= 'URL - '||Environment.API.apiURL || ' | Key - '||Environment.API.apiSecret || ' | VerificationKey - ' ||refInput.Data.VerificationKey;
+		SET Environment.Variables.Info.Payload 			= omsReq;
+		SET Environment.Variables.Info.Priority 		= '0';
+		
+		MOVE Ref_Env TO Environment.Variables;
+		--Call Audit procedure to create Audit Message and send it to Queue
+       	CALL com.nb.esb.iib.cmn.logging.PROC_Audit(Ref_Env, 'REQUEST', 'IIB_TO_PROVIDER','Deck_Status');
+       	SET OutputRoot.JSON.Data.AuditMessage = Ref_Env.AuditMessage;
+		PROPAGATE TO LABEL 'ToAudit';	
+		
+		--Set Output Request to be sent to OMS
+		SET OutputRoot.Properties								= NULL;
+		SET OutputRoot.HTTPRequestHeader."Content-Type" 		= 'application/json';
+		SET OutputRoot.HTTPRequestHeader."X-Trace-Id"			= SUBSTRING(SUBSTRING(CAST(Environment.Variables.Info.CorrelId AS CHARACTER) AFTER 'X''') BEFORE '''');
+		SET OutputRoot.JSON										= refInput;
+		SET OutputLocalEnvironment.Destination.HTTP.RequestURL 	= Environment.API.apiURL;	
+		
+		RETURN TRUE;
+	END;
+
+END MODULE;

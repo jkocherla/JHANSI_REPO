@@ -1,0 +1,78 @@
+/*****************************************************************************
+* Component Name	: OrderStatus_MQ_API								 	 *
+* Flow Name			: StatusToCA_EU.msgflow								 	 *
+* File Name  		: StatusToCA_AP_ASN_Mapping.esql   		     	 		 *
+*                                                                            *
+* Description		: This is responsible to create Output messgage to send  *
+*                     to CA.												 *
+* 																			 *
+* ***************************Revision History*********************************
+* Author 					Date			Description						 *
+* ===============		=============	============================		 *
+* Prakash Chandra 		Mar-14-2022		Initial Code checkin				 * 
+*																			 *
+******************************************************************************/
+CREATE COMPUTE MODULE StatusToCA_AP_ASN_Mapping
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		
+		--Declare variables
+		DECLARE StatusEvent 	REFERENCE TO InputRoot.JSON.Data;
+		DECLARE GMTConvert 		GMTTIMESTAMP CURRENT_GMTTIMESTAMP;
+		DECLARE X 				INTEGER 1;
+		
+		FOR count AS StatusEvent.Item[] DO
+			SET Environment.Variables.SuccessFlag 			= FALSE;
+			SET Environment.caorder 						= StatusEvent.Item[X].externalOrderNumber;
+			SET Environment.Variables.status				= CAST(StatusEvent.Item[X].status AS CHARACTER);
+			
+			IF LENGTH(CAST(StatusEvent.Item[X].lineId AS CHAR)) = 5 THEN
+				SET Environment.caline = StatusEvent.Item[X].lineId;
+			ELSEIF LENGTH(CAST(StatusEvent.Item[X].lineId AS CHAR)) = 4 THEN
+				SET Environment.caline = CAST(StatusEvent.Item[X].lineId AS CHAR);
+				SET Environment.caline =  '0' || Environment.caline;
+			ELSEIF LENGTH(CAST(StatusEvent.Item[X].lineId AS CHAR)) = 3 THEN
+				SET Environment.caline = CAST(StatusEvent.Item[X].lineId AS CHAR);
+				SET Environment.caline =  '00' || Environment.caline;
+			ELSEIF LENGTH(CAST(StatusEvent.Item[X].lineId AS CHAR)) = 2 THEN
+				SET Environment.caline = CAST(StatusEvent.Item[X].lineId AS CHAR);
+				SET Environment.caline =  '000' || Environment.caline;
+			ELSEIF LENGTH(CAST(StatusEvent.Item[X].lineId AS CHAR)) = 1 THEN
+				SET Environment.caline = CAST(StatusEvent.Item[X].lineId AS CHAR);
+				SET Environment.caline =  '0000' || Environment.caline;
+			ELSE
+				SET Environment.caline =  '00000';
+			END IF;
+			
+			SET Environment.Variables.requesttype 	= 'GetOrderDetailRequest';
+			PROPAGATE TO TERMINAL 'out1';
+			
+			IF Environment.Variables.SuccessFlag = TRUE THEN
+				--SET OutputRoot.JSON.Data.Value.DistributionCenterID = 1;
+				SET OutputRoot.JSON.Data.Value.DeliveryStatus 	= 'Complete';
+				SET GMTConvert 									= CAST(StatusEvent.Item[X].dateTime AS GMTTIMESTAMP FORMAT 'yyyy-MM-dd''T''HH:mm:ss''Z');
+				SET OutputRoot.JSON.Data.Value.ShippedDateUtc 	= CAST(GMTConvert AS CHARACTER FORMAT 'yyyy-MM-dd''T''HH:mm:ss''Z');
+				SET OutputRoot.JSON.Data.Value.TrackingNumber 	= StatusEvent.Item[X].attributes.Item[1].value;
+				IF StatusEvent.Item[X].attributes.Item[2].value <> ' ' THEN
+					SET OutputRoot.JSON.Data.Value.ReturnTrackingNumber = StatusEvent.Item[X].attributes.Item[2].value;
+				END IF;
+				SET OutputRoot.JSON.Data.Value.Items.Item[1].Sku 		= Environment.Variables.sku;		
+				SET OutputRoot.JSON.Data.Value.Items.Item[1].Quantity 	= InputRoot.JSON.Data.Item[X].quantity; 
+				SET Environment.Variables.sku							= CAST(Environment.Variables.sku AS CHARACTER);
+										
+				SET Environment.Variables.requesttype = 'ShipmentRequest';
+				PROPAGATE TO TERMINAL 'out1';
+			ELSE
+				RETURN FALSE;
+			END IF;		
+			
+			SET X = X + 1;
+		END FOR;
+		
+		--Send final response back to consumer
+		SET OutputRoot.JSON.Data = Environment.response;
+		
+		RETURN TRUE;
+	END;
+
+END MODULE;

@@ -1,0 +1,120 @@
+/*****************************************************************************
+* Component Name	: OrderStatus_MQ_API								 	 *
+* Flow Name			: StatusToCA_EU.msgflow								 	 *
+* Subflow Name      : CallChannelAdvisor.subflow							 *
+* File Name  		: CallChannelAdvisor_Response.esql 		     	 		 *
+*                                                                            *
+* Description		: This is responsible to log the response received from	 * 
+*					  Channel Advisor				 						 *
+* 																			 *
+* ***************************Revision History*********************************
+* Author 					Date			Description						 *
+* ===============		=============	============================		 *
+* Prakash Chandra 		Mar-14-2022		Initial Code checkin				 * 
+*																			 *
+******************************************************************************/
+CREATE COMPUTE MODULE CallChannelAdvisor_Response
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		
+		--Declate Variables
+		DECLARE lineId,errorCode,errorMsg	CHARACTER;
+		DECLARE lineIdInt 					INTEGER 0;
+		DECLARE X 							INTEGER 1;
+		DECLARE Order 						REFERENCE TO InputRoot.JSON.Data;
+		DECLARE Ref_Env						REFERENCE TO Environment;
+		DECLARE caRespPayloadBlob 			BLOB ASBITSTREAM(InputRoot.JSON);
+		DECLARE caRespPayload				CHARACTER BASE64ENCODE(COALESCE(caRespPayloadBlob,InputRoot.BLOB.BLOB));
+		DECLARE caHttpHeaderBlob 			BLOB ASBITSTREAM(InputRoot.HTTPResponseHeader);
+		DECLARE caHttpHeader				CHARACTER CAST(caHttpHeaderBlob AS CHAR CCSID 1208);	
+		
+		--Capture response received from Provider
+		SET errorCode		= InputRoot.HTTPResponseHeader."X-Original-HTTP-Status-Code";
+		
+		--Set Environment variables to be sent for craeting Audit Message
+		SET Environment.Variables.AuditMessage 		= NULL;
+		
+		IF errorCode = '200' OR errorCode = '204' THEN
+			SET Environment.Variables.ErrorInfo.Code 		= '0';
+		    SET Environment.Variables.ErrorInfo.Category 	= 'SUCCESS';
+		    IF Environment.Variables.requesttype = 'GetOrderDetailRequest' THEN 
+		    	SET Environment.Variables.ErrorInfo.Description = 'Successfully retrieved order details for Order# - '|| Environment.caorder ||' from CA';
+		    ELSEIF Environment.Variables.requesttype = 'ReturnCancelRequest' THEN
+		    	SET Environment.Variables.ErrorInfo.Description = 'Return/Cancel status successfully sent to CA for Order# - '|| Environment.caorder;
+		    ELSE	
+		    	SET Environment.Variables.ErrorInfo.Description = 'Shipment status successfully sent to CA for Order# - '|| Environment.caorder;
+		    END IF;		
+		ELSE 
+			--Get the error message
+			IF EXISTS(InputRoot.BLOB.BLOB[]) THEN 
+				CREATE LASTCHILD OF OutputLocalEnvironment DOMAIN('JSON') PARSE(InputRoot.BLOB.BLOB);
+				IF EXISTS(OutputLocalEnvironment.JSON.Data[]) THEN
+					SET errorMsg		= COALESCE(OutputLocalEnvironment.JSON.Data.error.message,COALESCE(OutputLocalEnvironment.JSON.Data.Message,''));
+				ELSE
+					SET errorMsg		= ' ';
+				END IF;
+			ELSE
+				SET errorMsg		= 'Check errorcode';
+			END IF;	
+				
+	    	SET Environment.Variables.ErrorInfo.Code 		= '1';
+	    	SET Environment.Variables.ErrorInfo.Category 	= 'FAILURE'; 
+	    	IF Environment.Variables.requesttype = 'GetOrderDetailRequest' THEN 
+		    	SET Environment.Variables.ErrorInfo.Description = 'Error while retrieving order details for Order# - '|| Environment.caorder ||' from CA'||' | Reason- '|| errorCode||' '|| errorMsg;
+		    ELSEIF Environment.Variables.requesttype = 'ReturnCancelRequest' THEN
+		    	SET Environment.Variables.ErrorInfo.Description = 'Error while sending Return/Cancel status to CA for Order# - '|| Environment.caorder ||' | Reason- '|| errorCode||' '|| errorMsg;
+		    ELSE	
+		    	SET Environment.Variables.ErrorInfo.Description = 'Error while sending Shipment status to CA for Order# - '|| Environment.caorder||' | Reason- '|| errorCode||' '|| errorMsg;
+		    END IF;
+	    END IF;	
+		
+		SET OutputLocalEnvironment					= NULL;
+		SET Environment.Variables.Info.Header 		= caHttpHeader;
+		SET Environment.Variables.Info.Payload 		= caRespPayload;
+		SET Environment.Variables.Info.Priority 	= '0';
+			
+		MOVE Ref_Env TO Environment.Variables;
+		--Call Audit procedure to create Audit Message and send it to Queue
+	    CALL com.nb.esb.iib.cmn.logging.PROC_Audit(Ref_Env, 'RESPONSE', 'PROVIDER_TO_IIB',Environment.Variables.requesttype);
+	    SET OutputRoot.JSON.Data.AuditMessage 	= Ref_Env.AuditMessage;
+		PROPAGATE TO LABEL 'ToAudit';
+		
+		--Throw error if error response is received from CA
+		IF errorCode <> '200' AND errorCode <> '204' THEN
+			THROW USER EXCEPTION MESSAGE 500 VALUES(Environment.Variables.ErrorInfo.Description);	
+		END IF;	
+		
+		
+		--Get LineId from Order details received from CA
+		IF Environment.Variables.requesttype = 'GetOrderDetailRequest' THEN 
+			
+			FOR COUNT AS Order.Items.Item[] DO
+				IF LENGTH(CAST(Order.Items.Item[X].ID AS CHAR)) <= 5 THEN
+					IF Environment.caline = Order.Items.Item[X].ID THEN
+						SET Environment.calineid 		= Order.Items.Item[X].ID;
+						SET Environment.Variables.sku 	= Order.Items.Item[X].Sku;
+					END IF;
+				ELSEIF LENGTH(CAST(Order.Items.Item[X].ID AS CHAR)) > 5 THEN
+					SET lineId = LENGTH(CAST(Order.Items.Item[X].ID AS CHAR)) - 4;
+					SET lineIdInt = CAST(lineId AS INT);
+					IF Environment.caline = CAST(SUBSTRING(CAST(Order.Items.Item[X].ID AS CHAR) FROM lineIdInt FOR 5) AS INT) THEN
+						SET Environment.calineid 		= Order.Items.Item[X].ID;
+						SET Environment.Variables.sku 	= Order.Items.Item[X].Sku;
+					END IF;
+				END IF;
+				SET X = X + 1;
+			END FOR;
+			
+			SET Environment.Variables.SuccessFlag = TRUE;
+		
+		ELSE
+			--Prepare response
+			SET Environment.response.statusCode 	= '200';
+			SET Environment.response.statusMessage 	= 'Success: Status for Order#' || Environment.caorder || ' has been sent to CA';
+			
+		END IF;
+
+		RETURN TRUE;
+	END;
+
+END MODULE;

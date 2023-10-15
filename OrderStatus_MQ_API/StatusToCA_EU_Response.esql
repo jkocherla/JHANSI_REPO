@@ -1,0 +1,48 @@
+/*****************************************************************************
+* Component Name	: OrderStatus_MQ_API								 	 *
+* Flow Name			: StatusToCA_EU.msgflow								 	 *
+* File Name  		: StatusToCA_EU_Response.esql	   		     	 		 *
+*                                                                            *
+* Description		: This is responsible to log the final response			 *
+* 																			 *
+* ***************************Revision History*********************************
+* Author 					Date			Description						 *
+* ===============		=============	============================		 *
+* Prakash Chandra 		Apr-28-2022		Initial Code 						 * 
+*																			 *
+******************************************************************************/
+CREATE COMPUTE MODULE StatusToCA_EU_Response
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		
+		--Declare variables
+		DECLARE Ref_Env		   				REFERENCE TO Environment;
+		
+		--Set Environment variables to be sent for craeting Audit Message
+		SET Environment.Variables.AuditMessage 				= NULL;
+		SET Environment.Variables.Info.Payload 				= NULL;
+		SET Environment.Variables.ErrorInfo.Code 			= '0';
+	    SET Environment.Variables.ErrorInfo.Category 		= 'SUCCESS';
+	    SET Environment.Variables.ErrorInfo.Description 	= 'Successfully sent status for Order# - '||Environment.Variables.Info.PONumber|| ' on queue - UPDATE.ORDERS.ACK.TO.MONGO.IN';
+		SET Environment.Variables.Info.Priority 			= '0';
+		MOVE Ref_Env TO Environment.Variables;
+		
+		--Call Audit procedure to create first Audit Message and send it to Queue
+	    CALL com.nb.esb.iib.cmn.logging.PROC_Audit(Ref_Env, 'RESPONSE', 'PROVIDER_TO_IIB','ToMongoFlow');
+	    SET OutputRoot.JSON.Data.AuditMessage = Ref_Env.AuditMessage;
+		PROPAGATE TO LABEL 'ToAudit';
+		
+		--Set Environment variables to be sent for craeting Audit Message
+		SET Environment.Variables.AuditMessage 			= NULL;
+	    SET Environment.Variables.Info.Priority 		= '0';
+	    MOVE Ref_Env TO Environment.Variables;	
+		
+		--Call Audit procedure to create first Audit Message and send it to Queue
+	    CALL com.nb.esb.iib.cmn.logging.PROC_Audit(Ref_Env, 'RESPONSE', 'IIB_TO_CONSUMER','End');
+	    SET OutputRoot.JSON.Data.AuditMessage = Ref_Env.AuditMessage;
+		PROPAGATE TO LABEL 'ToAudit';
+		
+		RETURN TRUE;
+	END;
+
+END MODULE;

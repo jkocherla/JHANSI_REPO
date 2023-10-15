@@ -1,0 +1,94 @@
+/*****************************************************************************
+* Component Name	: OrderStatus_MQ_API								 	 *
+* Flow Name			: StatusToCA_EU.msgflow								 	 *
+* Subflow Name      : CallChannelAdvisor.subflow							 *
+* File Name  		: CallChannelAdvisor_Request.esql  		     	 		 *
+*                                                                            *
+* Description		: This is responsible to send request to CA				 *
+* 																			 *
+* ***************************Revision History*********************************
+* Author 					Date			Description						 *
+* ===============		=============	============================		 *
+* Prakash Chandra 		Mar-14-2022		Initial Code checkin				 * 
+*																			 *
+******************************************************************************/
+CREATE COMPUTE MODULE CallChannelAdvisor_Request
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		
+		--Declare variables
+		DECLARE caURL	 		CHARACTER;
+		DECLARE Ref_Env			REFERENCE TO Environment;
+		
+		--Call API cache subflow to get api details from Global cache
+		SET Environment.cAPIType 	= 'ChannelAdvisorBaseAPI';
+		SET Environment.API 		= NULL;
+		PROPAGATE TO TERMINAL 'out1';
+
+		IF Environment.Variables.requesttype = 'ShipmentRequest' THEN
+			SET caURL 		= Environment.API.apiURL || 'Orders(' || CAST(Environment.caorder AS CHARACTER) || ')/Ship?access_token=' || Environment.Variables.caAuthToken;
+			
+		ELSEIF Environment.Variables.requesttype = 'ReturnCancelRequest' THEN
+			SET caURL 		= Environment.API.apiURL || 'OrderItems(' || CAST(Environment.calineid AS CHARACTER) || ')/Adjust?access_token=' || Environment.Variables.caAuthToken;
+				
+		ELSEIF Environment.Variables.requesttype = 'GetOrderDetailRequest' THEN
+			SET caURL 		= Environment.API.apiURL || 'Orders(' || CAST(Environment.caorder AS CHARACTER) || ')?access_token=' || Environment.Variables.caAuthToken || '&$expand=Items&exported=true';
+				
+		ELSE 
+			--Throw an error if the requesttype is missing
+			THROW USER EXCEPTION MESSAGE 500 VALUES('Internal Server Error, Failed To Find Request Type');
+		END IF;	
+		
+		--Set Environment variables to create Audit messagae
+		SET Environment.Variables.AuditMessage 				= NULL;
+		SET Environment.Variables.Info.WebOrderNumber 		= CAST(Environment.caorder AS CHARACTER);
+		SET Environment.Variables.Info.KeyData 				= NULL;
+		SET Environment.Variables.Info.KeyData 				= 'Status - '|| Environment.Variables.status ||' | UPC - ' || COALESCE(Environment.Variables.sku,' ');
+		SET Environment.Variables.Info.Header 				= 'URL - '||caURL;
+		SET Environment.Variables.Info.Payload 				= Environment.Variables.StatusReq;
+		SET Environment.Variables.ErrorInfo.Code 			= NULL;
+	    SET Environment.Variables.ErrorInfo.Category 		= NULL;
+	    SET Environment.Variables.ErrorInfo.Description 	= NULL;
+		SET Environment.Variables.Info.Priority 			= '0';
+		MOVE Ref_Env TO Environment.Variables;
+		
+		--Call Audit procedure to create Audit Message and send it to Queue
+       	CALL com.nb.esb.iib.cmn.logging.PROC_Audit(Ref_Env, 'REQUEST', 'IIB_TO_PROVIDER',Environment.Variables.requesttype);
+       	SET OutputRoot.JSON.Data.AuditMessage = Ref_Env.AuditMessage;
+		PROPAGATE TO LABEL 'ToAudit';	
+		
+		
+		--Set request headers and url to be sent to CA
+		SET OutputRoot				= NULL;
+		IF Environment.Variables.requesttype = 'ShipmentRequest' THEN
+			SET OutputRoot.Properties.CodedCharSetId 						= 1208;
+			SET OutputRoot.Properties.ContentType 							= 'application/json;charset=UTF-8';	
+			SET OutputRoot.HTTPRequestHeader."X-Trace-Id"					= SUBSTRING(SUBSTRING(CAST(Environment.Variables.Info.CorrelId AS CHARACTER) AFTER 'X''') BEFORE '''');
+			SET OutputLocalEnvironment.Destination.HTTP.RequestLine.Method 	= 'POST';
+			SET OutputLocalEnvironment.Destination.HTTP.RequestURL 			= caURL;
+				
+			SET OutputRoot.JSON.Data = Environment.Variables.RequestJSON.Data;
+			CREATE FIELD OutputRoot.JSON.Data.Value.Items IDENTITY(JSON.Array)Items;
+			
+		ELSEIF Environment.Variables.requesttype = 'ReturnCancelRequest' THEN
+			SET OutputRoot.Properties.CodedCharSetId 						= 1208;
+			SET OutputRoot.Properties.ContentType 							= 'application/json;charset=UTF-8';	
+			SET OutputRoot.HTTPRequestHeader."X-Trace-Id"					= SUBSTRING(SUBSTRING(CAST(Environment.Variables.Info.CorrelId AS CHARACTER) AFTER 'X''') BEFORE '''');
+			SET OutputLocalEnvironment.Destination.HTTP.RequestLine.Method 	= 'POST';
+			SET OutputLocalEnvironment.Destination.HTTP.RequestURL 			= caURL;
+			
+			SET OutputRoot.JSON.Data = Environment.Variables.RequestJSON.Data;
+				
+		ELSEIF Environment.Variables.requesttype = 'GetOrderDetailRequest' THEN
+			SET OutputRoot.Properties.CodedCharSetId 						= 1208;	
+			SET OutputRoot.Properties.ContentType 							= 'application/json;charset=UTF-8';	
+			SET OutputRoot.HTTPRequestHeader."X-Trace-Id"					= SUBSTRING(SUBSTRING(CAST(Environment.Variables.Info.CorrelId AS CHARACTER) AFTER 'X''') BEFORE '''');
+			SET OutputLocalEnvironment.Destination.HTTP.RequestLine.Method 	= 'GET';
+			SET OutputLocalEnvironment.Destination.HTTP.RequestURL 			= caURL;
+
+		END IF;
+		
+		RETURN TRUE;
+	END;
+
+END MODULE;

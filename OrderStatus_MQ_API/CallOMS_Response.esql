@@ -1,0 +1,64 @@
+
+
+CREATE COMPUTE MODULE CallOMS_Response
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		
+		--Declare Variables
+		DECLARE errorCode,errorMessage,reasonCode,msg	CHARACTER;
+		DECLARE Ref_Env		   							REFERENCE TO Environment;
+		DECLARE omsRespPayloadBlob 						BLOB ASBITSTREAM(InputRoot.JSON);
+		DECLARE omsRespPayload							CHARACTER BASE64ENCODE(COALESCE(omsRespPayloadBlob,InputRoot.BLOB.BLOB));
+		DECLARE omsHttpHeaderBlob 						BLOB ASBITSTREAM(InputRoot.HTTPResponseHeader);
+		DECLARE omsHttpHeader							CHARACTER CAST(omsHttpHeaderBlob AS CHAR CCSID 1208);
+		DECLARE InputMsg								REFERENCE to InputRoot;		
+		
+		--Capture response received from Provider
+		SET errorCode		= InputRoot.HTTPResponseHeader."X-Original-HTTP-Status-Code";
+		
+		--Set Environment variables to be sent for craeting Audit Message
+		SET Environment.Variables.AuditMessage 		= NULL;
+		
+		IF errorCode = '200' THEN
+			SET reasonCode 	= InputRoot.JSON.Data.ResponseCode;
+			IF reasonCode = '0' THEN
+				SET Environment.Variables.ErrorInfo.Code 		= '0';
+		    	SET Environment.Variables.ErrorInfo.Category 	= 'SUCCESS';
+		    	SET Environment.Variables.ErrorInfo.Description = 'RTN Status Successfully sent to OMS for Order# - ' || Environment.Variables.OrderNumber;
+			ELSE
+				SET msg 										= COALESCE(InputRoot.JSON.Data.Message,'');
+				SET Environment.Variables.ErrorInfo.Code 		= '1';
+	    		SET Environment.Variables.ErrorInfo.Category 	= 'FAILURE'; 
+		    	SET Environment.Variables.ErrorInfo.Description = 'Error sending RTN Status to OMS for Order# - ' || Environment.Variables.OrderNumber ||' '|| msg;
+			END IF;		
+	    	
+		ELSE 
+	    	SET Environment.Variables.ErrorInfo.Code 		= '1';
+	    	SET Environment.Variables.ErrorInfo.Category 	= 'FAILURE'; 
+	    	SET Environment.Variables.ErrorInfo.Description = 'Error response received from OMS for Order# - ' || Environment.Variables.OrderNumber ||' '|| COALESCE(errorCode,' ');  	
+	    END IF;	
+		
+		SET Environment.Variables.Info.Header 		= omsHttpHeader;
+		SET Environment.Variables.Info.Payload 		= omsRespPayload;
+		SET Environment.Variables.Info.Priority 	= '0';
+			
+		MOVE Ref_Env TO Environment.Variables;
+		--Call Audit procedure to create first Audit Message and send it to Queue
+	    CALL com.nb.esb.iib.cmn.logging.PROC_Audit(Ref_Env, 'RESPONSE', 'PROVIDER_TO_IIB','OMS_RTN');
+	    SET OutputRoot.JSON.Data.AuditMessage 	= Ref_Env.AuditMessage;
+		PROPAGATE TO LABEL 'ToAudit';	
+		
+		--Throw error if error response is received from OMS
+		IF errorCode <> '200' OR reasonCode <> '0' THEN
+			THROW USER EXCEPTION MESSAGE 500 VALUES(Environment.Variables.ErrorInfo.Description);	
+		END IF;
+		
+		--Send final response back to consumer	
+		SET OutputRoot.JSON								= NULL;
+		SET OutputRoot.JSON.Data.response.statusCode 	= errorCode;
+		SET OutputRoot.JSON.Data.response.statusMessage = 'Success : RTN Status Successfully sent to OMS for Order# - ' || Environment.Variables.OrderNumber ;
+		
+		RETURN TRUE;
+	END;
+
+END MODULE;

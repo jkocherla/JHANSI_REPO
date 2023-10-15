@@ -1,0 +1,106 @@
+/*****************************************************************************
+* Component Name	: OrderStatus_MQ_API								 	 *
+* Flow Name			: StatusToDeck.msgflow								 	 *
+* File Name  		: StatusToDeck_Mapping.esql        		     	 		 *
+*                                                                            *
+* Description		: This is responsible to create message o be sent to Deck*
+* 																			 *
+* ***************************Revision History*********************************
+* Author 					Date			Description						 *
+* ===============		=============	============================		 *
+* Prakash Chandra 		Mar-14-2022		Initial Code checkin				 * 
+*																			 *
+******************************************************************************/
+CREATE COMPUTE MODULE StatusToDeck_Mapping
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		
+		--Declare Variables
+		DECLARE X 												INTEGER 1;	
+		DECLARE DVST 											BOOLEAN FALSE;
+		DECLARE DTT_OMS_URL,DTTStatus,DTT_OMS_SHAREDKEY 		CHARACTER;
+		DECLARE apiController,key,stringHolder,DateConvert		CHARACTER;
+		DECLARE UTC ,statusDate									TIMESTAMP;
+		DECLARE style,width,size 								CHARACTER;
+		DECLARE BlobHolder 										BLOB;
+		DECLARE AuroraPattern 									CHARACTER 'yyyy-MM-dd-HH.mm.ss.SSSSSS';
+		DECLARE cSiteCode 										CHARACTER Environment.cSiteCode;
+		DECLARE Opt 											INTEGER BITOR(FolderBitStream, ValidateContent, ValidateValue);
+		DECLARE statusDetail 									REFERENCE TO InputRoot.JSON.Data;
+		DECLARE SKU,Status										CHARACTER ' ';
+		
+		SET OutputRoot.Properties = InputRoot.Properties;
+		
+		--Call API Cache subflow to get API details .
+		IF (Environment.MFT.Source = 'DTT') THEN
+			SET Environment.cAPIType 	= 'DeckCommerceNBStatusUpdate';
+		ELSEIF (Environment.MFT.Source = 'DTC') THEN
+			SET Environment.cAPIType 	= 'DTCDeckCommerceNBStatusUpdate';
+		END IF;
+		SET Environment.API 		= NULL;
+		PROPAGATE TO TERMINAL 'out1';
+		
+		SET DTT_OMS_SHAREDKEY 	= Environment.API.apiSecret;
+		SET DTT_OMS_URL 		= Environment.API.apiURL;
+		
+		--Creating Output JSON message to be sent to DECK.	
+		SET OutputRoot.JSON.Data.OrderNumber 					= statusDetail.Item[X].orderNumber;
+		IF (Environment.MFT.Source = 'DTT') THEN
+			SET DTTStatus 											= com.nb.esb.iib.cmn.ord.util.dttOmsStatusConversion(statusDetail.Item[X].status);
+		ELSEIF (Environment.MFT.Source = 'DTC') THEN
+			SET DTTStatus 											= com.nb.esb.iib.cmn.ord.util.dtcOmsStatusConversion(statusDetail.Item[X].status);
+		END IF;
+		SET OutputRoot.JSON.Data.StatusCode 					= DTTStatus;			
+		SET statusDate 											= CAST(statusDetail.Item[X].dateTime AS TIMESTAMP FORMAT 'yyyy-MM-dd''T''HH:mm:ss''Z');	
+		SET OutputRoot.JSON.Data.PODate 						= CAST(statusDate AS CHARACTER FORMAT 'yyyy-MM-dd''T''HH.mm.ss');
+		SET OutputRoot.JSON.Data.PONumber 						= statusDetail.Item[X].externalOrderNumber;
+		SET OutputRoot.JSON.Data.DontValidateStatusTransition 	= DVST;
+		SET Status												= CAST(DTTStatus AS CHARACTER) || ' ' || Status;
+		SET Environment.Variables.OrderNumber					= CAST(statusDetail.Item[X].orderNumber AS CHARACTER);
+		
+		CREATE FIELD OutputRoot.JSON.Data.GtinsToUpdate IDENTITY(JSON.Array)GtinsToUpdate;
+		FOR count AS statusDetail.Item[] DO	
+			
+				
+			IF (statusDetail.Item[X].designId <> ' ' AND Environment.MFT.Source = 'DTT') THEN
+				SET BlobHolder = CAST(SUBSTRING(statusDetail.Item[X].designId FROM 3 FOR 10) AS BLOB); 
+				SET OutputRoot.JSON.Data.GtinsToUpdate.Item[X].Id = CAST(X'00000000' || BlobHolder AS INTEGER);
+			ELSEIF (Environment.MFT.Source = 'DTC') THEN
+				SET OutputRoot.JSON.Data.GtinsToUpdate.Item[X].Gtin = statusDetail.Item[X].itemBarcode;
+				SET OutputRoot.JSON.Data.GtinsToUpdate.Item[X].Quantity = statusDetail.Item[X].quantity;
+			END IF;
+
+			SET style 		= TRIM(SUBSTRING(statusDetail.Item[X].SKU FROM 1 FOR 9));
+			SET width 		= TRIM(SUBSTRING(statusDetail.Item[X].SKU FROM 10 FOR 3));
+			SET size 		= TRIM(SUBSTRING(statusDetail.Item[X].SKU FROM 13 FOR 3));
+			SET OutputRoot.JSON.Data.GtinsToUpdate.Item[X].SKU 	= style || '-' || width || '-' || size;	
+			IF (statusDetail.Item[X].status = 'ACK') OR (statusDetail.Item[X].status = 'RSV') AND (Environment.MFT.Source = 'DTT') THEN
+				SET statusDate = CAST(statusDetail.Item[X].attributes.Item[1].value AS TIMESTAMP FORMAT 'yyyy-MM-dd''T''HH:mm:ss''Z');
+				SET OutputRoot.JSON.Data.GtinsToUpdate.Item[X].EstimatedShippingDate = CAST(statusDate AS CHARACTER FORMAT 'yyyy-MM-dd''T''HH:mm:ssZZZ');
+			END IF;
+			IF (statusDetail.Item[X].status = 'SHP') AND (Environment.MFT.Source = 'DTT') THEN
+				SET OutputRoot.JSON.Data.GtinsToUpdate.Item[X].Custom2 = '2 - I - STD Custom Oversea';
+			END IF;
+			SET X = X + 1;
+			
+			SET SKU			= CAST(statusDetail.Item[X].SKU AS CHARACTER) || ' ' || SKU;
+			
+		END FOR;
+		
+		SET OutputRoot.JSON.Data.TimestampUTC 		= CAST(CURRENT_GMTTIMESTAMP AS CHARACTER FORMAT 'M/d/yyyy HH:mm a');
+		SET OutputRoot.JSON.Data.SiteCode 			= cSiteCode;
+--		IF (Environment.MFT.Source = 'DTT') THEN
+			SET apiController = SUBSTRING(LOWER(DTT_OMS_URL) AFTER '.com/') || OutputRoot.JSON.Data.TimestampUTC || DTT_OMS_SHAREDKEY;
+--		ELSEIF (Environment.MFT.Source = 'DTC') THEN
+--			SET apiController = SUBSTRING(LOWER(DTT_OMS_URL) AFTER '.net/') || OutputRoot.JSON.Data.TimestampUTC || DTT_OMS_SHAREDKEY;
+--		END IF;
+		SET key 									= com.nb.esb.iib.cmn.util.HashCon(apiController);
+		SET OutputRoot.JSON.Data.VerificationKey 	= UPPER(key); 
+		
+		SET Environment.Variables.SKU 		= SKU;
+		SET Environment.Variables.Status	= Status;
+		
+		RETURN TRUE;
+	END;
+
+END MODULE;

@@ -1,0 +1,37 @@
+/*****************************************************************************
+* Component Name	: OrderStatus_MQ_API								 	 *
+* Flow Name			: StatusToCA_EU.msgflow								 	 *
+* Subflow Name      : CallChannelAdvisor.subflow							 *
+* File Name  		: CallChannelAdvisor_GetToken.esql        		     	 *
+*                                                                            *
+* Description		: This is responsible to get token from CA 				 *
+* 																			 *
+* ***************************Revision History*********************************
+* Author 					Date			Description						 *
+* ===============		=============	============================		 *
+* Prakash Chandra 		Mar-14-2022		Initial Code checkin				 * 
+*																			 *
+******************************************************************************/
+CREATE COMPUTE MODULE CallChannelAdvisor_GetToken
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		
+		--Declare Variables
+		DECLARE Region 					CHARACTER;
+		DECLARE refInput				REFERENCE TO InputRoot.JSON;
+		DECLARE caReqBlob 				BLOB ASBITSTREAM(InputRoot.JSON);
+		DECLARE caReq					CHARACTER BASE64ENCODE(caReqBlob);
+		
+		-- Maintain original request parameters
+		SET Environment.Variables.RequestJSON 		= refInput; 
+		SET Environment.Variables.StatusReq			= caReq;
+		
+		--Call API Cache subflow to get API details from Global Cache.
+		SET Environment.cAPIType 	= 'ChannelAdvisorTokenAPI';
+		SET Environment.API			= NULL;
+		PROPAGATE TO TERMINAL 'out1';
+
+		RETURN TRUE;
+	END;
+
+END MODULE;
