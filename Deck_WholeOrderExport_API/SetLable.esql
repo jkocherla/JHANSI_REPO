@@ -1,0 +1,135 @@
+/*****************************************************************************
+* Component Name	: Deck_WholeOrderExport_API								 *
+* Flow Name			: Deck_WholeOrderExport_API.msgflow						 *
+* File Name  		: SetLable.esql        		     	 					 *
+*                                                                            *
+* Description		: This ESQL File Sets Lable name as per Conditions to  	 *
+*                     route it to next System/API.							 *
+* 																			 *
+* ***************************Revision History*********************************
+* Author 					Date			Description						 *
+* ===============		=============	============================		 *
+* Prakash Chandra 		May-12-2021		Initial Code						 * 
+* Prakash Chandra 		June-22-2021	Added Site code in UDP	 			 * 
+* Prakash Chandra 		Feb-18-2022		Added logging code					 * 
+*																			 *
+******************************************************************************/
+
+DECLARE ReturnSiteCodeList 	EXTERNAL CHARACTER '';
+DECLARE SiteCodeList 		EXTERNAL CHARACTER '';
+------------------------------------------------------------------------------
+CREATE COMPUTE MODULE SetLable
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		
+		--Declare Variable
+		DECLARE OrderId,SiteCode,ReturnFlag 		CHARACTER;
+		DECLARE X 									INTEGER 1;
+		DECLARE Input 								REFERENCE TO InputRoot.JSON.Data;
+		DECLARE Ref_Env		   						REFERENCE TO Environment;
+		DECLARE httpHeaderBlob 						BLOB ASBITSTREAM(InputRoot.HTTPInputHeader);
+		DECLARE httpHeader							CHARACTER CAST(httpHeaderBlob AS CHAR CCSID 1208);
+		DECLARE httpPayloadBlob 					BLOB ASBITSTREAM(InputRoot.JSON);
+		DECLARE httpPayload							CHARACTER BASE64ENCODE(httpPayloadBlob);
+		DECLARE reqIdentifier,identifier,errFlag	CHARACTER;
+		
+		--Get Request Identifier for logging
+		IF InputRoot.HTTPInputHeader."X-Trace-Id" IS NULL THEN
+			SET reqIdentifier		= SUBSTRING(SUBSTRING(CAST(InputLocalEnvironment.Destination.HTTP.RequestIdentifier AS CHARACTER) AFTER '''') BEFORE '''');
+		ELSE
+			SET reqIdentifier		= CAST(InputRoot.HTTPInputHeader."X-Trace-Id" AS CHARACTER);
+		END IF;
+		
+		SET SiteCode 								= Input.Order.SiteCode;
+		SET OrderId									= Input.Order.OrderNumber;
+		SET Environment.Variables.InputProperties 	= InputRoot.Properties;
+		SET Environment.cSiteCode					= SiteCode;
+		
+		--Set Environment variables to create Audit message
+		SET Environment.Variables.AuditMessage 				= NULL;
+		SET Environment.Variables.Info.UUID					= UUIDASCHAR;
+		SET Environment.Variables.Info.SubflowName 			= 'post';
+		SET Environment.Variables.Info.CorrelId 			= reqIdentifier;
+		SET Environment.Variables.Info.PONumber 			= OrderId;
+		SET Environment.Variables.Info.SiteCode 			= SiteCode;
+		SET Environment.Variables.Info.Header 				= httpHeader;
+		SET Environment.Variables.Info.Payload 				= httpPayload;
+		SET Environment.Variables.Info.Priority 			= '0';
+		MOVE Ref_Env TO Environment.Variables;
+		
+		--Call Audit procedure to create Audit Message and send it to Queue
+       	CALL com.nb.esb.iib.cmn.logging.PROC_Audit(Ref_Env, 'REQUEST', 'CONSUMER_TO_IIB','Start');
+       	SET OutputRoot.JSON.Data.AuditMessage = Ref_Env.AuditMessage;
+		PROPAGATE TO LABEL 'ToAudit';
+		
+		-- Allow to continue only if SiteCode received is valid
+		IF CONTAINS(SiteCodeList,SiteCode) THEN
+			--Start Processing Deck Message
+			FOR COUNT AS Input.Order.OrderItems.Item[] DO
+				IF (CONTAINS(ReturnSiteCodeList,SiteCode)) AND (UCASE(Input.Order.OrderItems.Item[X].ItemStatusName) = 'PENDING RETURN') THEN
+					SET ReturnFlag = 'YES';
+					SET identifier = 'Return';
+				
+				ELSEIF (SiteCode = 'NBUS') AND UCASE(Input.Order.OrderItems.Item[X].ItemStatusName) = 'PICKED UP' THEN
+					CALL CopyEntireMessage();
+					SET Environment.Variables.Index	= X;
+					SET identifier = 'BOPIS';
+					SET InputLocalEnvironment.Destination.RouterList.DestinationData[1].labelName = 'BOPIS';	
+					PROPAGATE TO TERMINAL 'out' DELETE NONE;
+					
+				END IF;	
+				SET X	= X+1;
+			END FOR;
+			
+			--If ItemStatus for any product in order is PENDING RETURN then trigger only single request to RMA API.
+			IF ReturnFlag = 'YES' THEN
+					CALL CopyEntireMessage();
+					SET InputLocalEnvironment.Destination.RouterList.DestinationData[1].labelName = 'RETURN';	
+					PROPAGATE TO TERMINAL 'out' DELETE NONE;
+			END IF;	
+		ELSE
+			SET errFlag	= 'YES';
+			
+		END IF;
+		
+		--Clear Output Root
+		SET OutputRoot = NULL;
+		
+		--Set TraceId to be sent back in response
+		SET OutputRoot.HTTPResponseHeader."X-Trace-Id"	= Environment.Variables.Info.CorrelId;
+		
+		--Send Ack message to Deck
+		IF errFlag	= 'YES' THEN
+			SET OutputRoot.JSON.Data.response.statusCode 	= '400';
+			SET OutputRoot.JSON.Data.response.statusMessage = 'Failure: SiteCode does not matches any criteria for Order# ' || OrderId ;
+			SET OutputRoot.JSON.Data.response.messageID 	= 'Unique Message Identifier: ' || Environment.Variables.Info.CorrelId;
+			
+			SET InputLocalEnvironment.Destination.HTTP.ReplyStatusCode	= '400';
+		ELSE
+			SET OutputRoot.JSON.Data.response.statusCode 	= '200';
+			SET OutputRoot.JSON.Data.response.statusMessage = 'Success: '||identifier||' request for Order# ' || OrderId || ' has been received';
+			SET OutputRoot.JSON.Data.response.messageID 	= 'Unique Message Identifier: ' || Environment.Variables.Info.CorrelId;
+		END IF;		
+		
+		
+					
+		SET InputLocalEnvironment.Destination.RouterList.DestinationData[1].labelName = 'ACK';
+		
+		RETURN TRUE;
+	END;
+	
+		CREATE PROCEDURE CopyMessageHeaders() BEGIN
+		DECLARE I INTEGER 1;
+		DECLARE J INTEGER;
+		SET J = CARDINALITY(InputRoot.*[]);
+		WHILE I < J DO
+			SET OutputRoot.*[I] = InputRoot.*[I];
+			SET I = I + 1;
+		END WHILE;
+	END;
+
+	CREATE PROCEDURE CopyEntireMessage() BEGIN
+		SET OutputRoot = InputRoot;
+	END;
+	
+END MODULE;

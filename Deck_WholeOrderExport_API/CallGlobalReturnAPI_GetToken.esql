@@ -1,0 +1,35 @@
+/*****************************************************************************
+* Component Name	: Deck_WholeOrderExport_API								 *
+* Flow Name			: Deck_WholeOrderExport_API.msgflow						 *
+* File Name  		: CallGlobalReturnAPI_GetToken.esql	 					 *
+*                                                                            *
+* Description		: This ESQL File Sets the variables to be used in Token	 *
+*                     call subflow.											 *
+* 																			 *
+* ***************************Revision History*********************************
+* Author 					Date			Description						 *
+* ===============		=============	============================		 *
+* Prakash Chandra 		Feb-18-2022		Initial Code						 *
+*																			 *
+******************************************************************************/
+CREATE COMPUTE MODULE CallGlobalReturnAPI_GetToken
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		--Declare variables
+		DECLARE refInput			REFERENCE TO InputRoot.JSON;
+		DECLARE rmaReqBlob 			BLOB ASBITSTREAM(InputRoot.JSON);
+		DECLARE rmaReq				CHARACTER BASE64ENCODE(rmaReqBlob);
+		
+		-- Maintain original request parameters
+		SET Environment.Variables.outReqJSON 		= refInput; 
+		SET Environment.Variables.outReq			= rmaReq;	
+		
+		--Call API Cache subflow to get API details from Global Cache.
+		SET Environment.cAPIType 	= 'NewBalanceTokenAPI';
+		SET Environment.API			= NULL;		
+		PROPAGATE TO TERMINAL 'out1';
+		
+		RETURN TRUE;
+	END;
+
+END MODULE;

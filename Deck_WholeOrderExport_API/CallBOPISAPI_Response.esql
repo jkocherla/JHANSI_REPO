@@ -1,0 +1,66 @@
+/*****************************************************************************
+* Component Name	: Deck_WholeOrderExport_API								 *
+* Flow Name			: Deck_WholeOrderExport_API.msgflow						 *
+* File Name  		: CallGlobalReturnAPI_Response.esql	 					 *
+*                                                                            *
+* Description		: This ESQL File logs the response recevied and throws   *
+*                     error if needed.										 *
+* 																			 *
+* ***************************Revision History*********************************
+* Author 					Date			Description						 *
+* ===============		=============	============================		 *
+* Prakash Chandra 		May-14-2021		Initial Code						 *
+* Prakash Chandra 		Feb-18-2022		Added logging code					 * 
+*																			 *
+******************************************************************************/
+CREATE COMPUTE MODULE CallBOPISAPI_Response
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		
+		--Declare variables
+		DECLARE errorCode,errorMsg		CHARACTER;
+		DECLARE Ref_Env					REFERENCE TO Environment;
+		DECLARE bopisRespPayloadBlob 	BLOB ASBITSTREAM(InputRoot.JSON);
+		DECLARE bopisRespPayload		CHARACTER BASE64ENCODE(COALESCE(bopisRespPayloadBlob,InputRoot.BLOB.BLOB));
+		DECLARE bopisHttpHeaderBlob 	BLOB ASBITSTREAM(InputRoot.HTTPResponseHeader);
+		DECLARE bopisHttpHeader			CHARACTER CAST(bopisHttpHeaderBlob AS CHAR CCSID 1208);	
+		
+		--Capture response received from Provider
+		SET errorCode		= InputRoot.HTTPResponseHeader."X-Original-HTTP-Status-Code";
+		
+		--Set Environment variables to be sent for craeting Audit Message
+		SET Environment.Variables.AuditMessage 		= NULL;
+		
+		IF errorCode = '200' THEN
+			SET Environment.Variables.ErrorInfo.Code 		= '0';
+		    SET Environment.Variables.ErrorInfo.Category 	= 'SUCCESS';
+		    SET Environment.Variables.ErrorInfo.Description = 'Request successfully sent to BOPIS API for Order# -'|| Environment.Variables.Info.PONumber;	
+		ELSE 
+			CREATE LASTCHILD OF OutputLocalEnvironment DOMAIN('JSON') PARSE(InputRoot.BLOB.BLOB);
+			SET errorMsg		= COALESCE(OutputLocalEnvironment.JSON.Data.error.message,COALESCE(OutputLocalEnvironment.JSON.Data.moreInformation,''));
+			
+	    	SET Environment.Variables.ErrorInfo.Code 		= '1';
+	    	SET Environment.Variables.ErrorInfo.Category 	= 'FAILURE'; 
+	    	SET Environment.Variables.ErrorInfo.Description = 'Error response received from BOPIS API for Order#- ' || Environment.Variables.Info.PONumber ||' '|| COALESCE(errorCode,' ') ||' ' ||COALESCE(errorMsg,''); 
+	    END IF;	
+		
+		SET OutputLocalEnvironment					= NULL;
+		SET Environment.Variables.Info.Header 		= bopisHttpHeader;
+		SET Environment.Variables.Info.Payload 		= bopisRespPayload;
+		SET Environment.Variables.Info.Priority 	= '0';
+		MOVE Ref_Env TO Environment.Variables;
+		
+		--Call Audit procedure to create Audit Message and send it to Queue
+	    CALL com.nb.esb.iib.cmn.logging.PROC_Audit(Ref_Env, 'RESPONSE', 'PROVIDER_TO_IIB','BOPIS_API');
+	    SET OutputRoot.JSON.Data.AuditMessage 	= Ref_Env.AuditMessage;
+		PROPAGATE TO LABEL 'ToAudit';	
+		
+		--Throw error if error response is received from CA
+		IF errorCode <> '200' THEN
+			THROW USER EXCEPTION MESSAGE 500 VALUES(Environment.Variables.ErrorInfo.Description);	
+		END IF;	
+		
+		RETURN TRUE;
+	END;
+
+END MODULE;

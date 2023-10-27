@@ -1,0 +1,2140 @@
+---
+swagger: "2.0"
+info:
+  title: "Deck Whole Order Status API"
+  description: "Service responsible for receiving Deck's Whole Order Export.\n\n#\
+    \ V1\n- Base for Deck Whole Order Status API\n- \n---\n"
+  version: "v1.0.1"
+  x-ibm-name: "deck-whole-order-status-api"
+basePath: "/v/deck/wholeOrderStatus/v1"
+consumes:
+- "application/json"
+- "text/json"
+produces:
+- "application/json"
+- "text/json"
+paths:
+  /export:
+    post:
+      operationId: "post"
+      description: "Report a new Whole Order Export to the API."
+      parameters:
+      - name: "request"
+        in: "body"
+        description: "Request body"
+        required: true
+        schema:
+          $ref: "#/definitions/Request"
+      responses:
+        200:
+          description: "Return success"
+        401:
+          description: "Unauthorized."
+        412:
+          description: "Missing required data."
+        417:
+          description: "Validation Error."
+        500:
+          description: "Internal Server Error."
+        default:
+          description: "Unexpected Error"
+          schema:
+            $ref: "#/definitions/Error"
+definitions:
+  Request:
+    description: "Request body for POST /export"
+    type: "object"
+    properties:
+      Order:
+        description: "This is the object that contains all the details of an order."
+        $ref: "#/definitions/WholeOrderExport"
+      OrderStatusCodeChange:
+        description: "If the Order Status changed, the new status is listed here."
+        type: "string"
+      ItemChangeID:
+        description: "If the item status changed, the ID of the new OrderItemStatus\
+          \ is listed here."
+        type: "string"
+      ItemChangeType:
+        description: "If the item status changed, the code of the OrderItemStatus\
+          \ is listed here."
+        type: "string"
+      OrderItemIdsUpdated:
+        description: "Identifies specific items that have changed for this notification"
+        type: "array"
+        items:
+          type: "integer"
+      FormatVersion:
+        description: "Format version"
+        type: "integer"
+    required:
+    - "Order"
+  WholeOrderExport:
+    description: "Order details"
+    type: "object"
+    properties:
+      ShouldSerializeNotificationVersion:
+        description: "Should serialize notification version?"
+        type: "boolean"
+      OrderNotes:
+        description: "Order notes"
+        type: "array"
+        items:
+          $ref: "#/definitions/WholeOrderOrderNoteExport"
+      PreventAutoProcessing:
+        description: "Prevent auto processing?"
+        type: "boolean"
+      Readonly:
+        description: "Read only?"
+        type: "boolean"
+      Legacy:
+        description: "Legacy?"
+        type: "boolean"
+      MembershipID:
+        description: "Membership ID"
+        type: "string"
+      IsBrokenOrderResolved:
+        description: "Is broken order resolved?"
+        type: "boolean"
+      DoNotAllowEmail:
+        description: "Do not allow email?"
+        type: "boolean"
+      SourceAgent:
+        description: "Source agent"
+        type: "string"
+      SourceIp:
+        description: "Source IP address"
+        type: "string"
+      SourceUrl:
+        description: "Source URL"
+        type: "string"
+      Source1:
+        description: "Source 1"
+        type: "string"
+      Source2:
+        description: "Source 2"
+        type: "string"
+      Source3:
+        description: "Source 3"
+        type: "string"
+      CustomerOrderLocale:
+        description: "Customer order locale"
+        type: "string"
+      TaxServiceError:
+        description: "Tax service error?"
+        type: "boolean"
+      OrderGrade:
+        $ref: "#/definitions/OrderGrade"
+      CustomAttributes:
+        description: "Collection of custom attributes"
+        type: "array"
+        items:
+          $ref: "#/definitions/WholeOrderCustomAttributeExport"
+      DeliveryDate:
+        description: "Delivery date"
+        type: "string"
+        format: "date-time"
+      OrderDateUTC:
+        description: "Order date UTC"
+        type: "string"
+        format: "date-time"
+      DateCreatedUTC:
+        description: "Date created UTC"
+        type: "string"
+        format: "date-time"
+      RequestedDeliveryUTC:
+        description: "Requested delivery UTC"
+        type: "string"
+        format: "date-time"
+      SiteID:
+        description: "Site ID"
+        type: "integer"
+      GiftCards:
+        description: "Collection of gift cards"
+        type: "array"
+        items:
+          $ref: "#/definitions/ExportGiftCard"
+      GiftCardsIssued:
+        description: "Collection of gift cards issued"
+        type: "array"
+        items:
+          $ref: "#/definitions/GiftCardsIssued"
+      ShippingMethods:
+        description: "Collection of shipping methods"
+        type: "array"
+        items:
+          $ref: "#/definitions/OrderShipping"
+      Shipments:
+        description: "Collection of export shipments"
+        type: "array"
+        items:
+          $ref: "#/definitions/ExportShipment"
+      Returns:
+        description: "Collection of returns"
+        type: "array"
+        items:
+          $ref: "#/definitions/Return"
+      OrderItems:
+        description: "Collection of order items"
+        type: "array"
+        items:
+          $ref: "#/definitions/WholeOrderItemExport"
+      OrderAdjustments:
+        description: "Collection of order adjustment"
+        type: "array"
+        items:
+          $ref: "#/definitions/ExportOrderAdjustment"
+      OrderPayments:
+        description: "Collection of order payments"
+        type: "array"
+        items:
+          $ref: "#/definitions/WholeOrderOrderPaymentExport"
+      OrderTaxes:
+        description: "Collection of order taxes"
+        type: "array"
+        items:
+          $ref: "#/definitions/WholeOrderOrderTaxExport"
+      OrderStatus:
+        description: "Order status enum"
+        $ref: "#/definitions/OrderStatus"
+      OrderStatusSubTypeID:
+        description: "Order status subtype ID"
+        type: "integer"
+      OrderID:
+        description: "Order ID"
+        type: "integer"
+      ExternalOrderID:
+        description: "External Order ID"
+        type: "string"
+      OrderNumber:
+        description: "Order number"
+        type: "string"
+      BillingAddressID:
+        description: "Billing address ID"
+        type: "integer"
+      ShippingAddressID:
+        description: "Shipping address ID"
+        type: "integer"
+      BillingAddress:
+        $ref: "#/definitions/WholeOrderOmsAddressExport"
+      ShippingAddress:
+        $ref: "#/definitions/WholeOrderOmsAddressExport"
+      CustomerID:
+        description: "Customer ID"
+        type: "string"
+      GiftRecipt:
+        description: "Gift receipt?"
+        type: "boolean"
+      ShippingMethodID:
+        description: "Shipping method ID"
+        type: "integer"
+      Autoprocessed:
+        description: "Autoprocessed?"
+        type: "boolean"
+      OrderGradingEngineID:
+        description: "Order grading engine ID"
+        type: "integer"
+      Settled:
+        description: "Settled?"
+        type: "boolean"
+      FolderIds:
+        description: "Collection of folder IDs"
+        type: "array"
+        items:
+          type: "integer"
+      PaymentFailureCount:
+        description: "Payment failure count"
+        type: "integer"
+      ShippingInstructions:
+        description: "Shipping instructions"
+        type: "integer"
+      OrderSource:
+        description: "Order source"
+        type: "string"
+      Custom1:
+        description: "Custom 1"
+        type: "string"
+      Custom2:
+        description: "Custom 2"
+        type: "string"
+      Custom3:
+        description: "Custom 3"
+        type: "string"
+      Custom4:
+        description: "Custom 4"
+        type: "string"
+      Custom5:
+        description: "Custom 5"
+        type: "string"
+      LockedByName:
+        description: "Locked by name"
+        type: "string"
+      OrderStatusCode:
+        description: "Order status code"
+        type: "string"
+      LockExpirationUTC:
+        description: "Lock expiration date UTC"
+        type: "string"
+        format: "date-time"
+      OrderAccessHistory:
+        description: "Collection of order access histories"
+        type: "array"
+        items:
+          $ref: "#/definitions/AccessHistory"
+      Totals:
+        $ref: "#/definitions/WholeOrderTotalInformationExport"
+      PreventTransactionalEmailsOnSave:
+        description: "Prevent transactional emails on save?"
+        type: "boolean"
+      GiftWrap:
+        description: "Gift wrap?"
+        type: "boolean"
+      StoreFrontID:
+        description: "Store front ID"
+        type: "integer"
+      ManualReturn:
+        description: "Manual return?"
+        type: "boolean"
+      ApprovalRequired:
+        description: "Approval required?"
+        type: "boolean"
+      GracePeriodUTC:
+        description: "Grace period date UTC"
+        type: "string"
+        format: "date-time"
+      OrderStatusChangeDateUTC:
+        description: "Order status change date UTC"
+        type: "string"
+        format: "date-time"
+      TeamOrderCollectionID:
+        description: "Team order collection ID"
+        type: "integer"
+      ReferencedOrderNumber:
+        description: "Referenced order number"
+        type: "string"
+      IsReadOnlyOrderStatus:
+        description: "Is read only Order Status?"
+        type: "boolean"
+      InternalOrderStatusName:
+        description: "Internal Order Status name"
+        type: "string"
+      ProcessingFee:
+        description: "Processing fee"
+        type: "number"
+      ShippingMethod:
+        description: "Shipping method"
+        type: "string"
+      SimpleTotals:
+        $ref: "#/definitions/WholeOrderSimpleTotalInformationExport"
+      OrderShipments:
+        description: "Collection of Order Shipments"
+        type: "array"
+        items:
+          $ref: "#/definitions/WholeOrderShipmentExport"
+      OrderReturns:
+        description: "Collection of order returns"
+        type: "array"
+        items:
+          $ref: "#/definitions/WholeOrderExportReturnExport"
+      SiteCode:
+        description: "Site code"
+        type: "string"
+      SiteCulture:
+        description: "Site culture"
+        type: "string"
+      EmailOptIn:
+        description: "Email opt in?"
+        type: "boolean"
+      ShippingMethodName:
+        description: "Shipping method name"
+        type: "string"
+      PaymentMethod:
+        description: "Payment method"
+        type: "string"
+      TrackingLink:
+        description: "Tracking link"
+        type: "string"
+      Invoices:
+        description: "Collection of IOrderInvoices"
+        type: "array"
+        items:
+          $ref: "#/definitions/IOrderInvoice"
+      OrderEmailsSent:
+        description: "Collection of ExportOrderEmailSent"
+        type: "array"
+        items:
+          $ref: "#/definitions/ExportOrderEmailSent"
+  WholeOrderOrderNoteExport:
+    description: "Order note details for the Whole Order Export"
+    type: "object"
+    properties:
+      OrderID:
+        description: "Order ID"
+        type: "integer"
+      Group:
+        description: "NoteGroup enum, values below. \nDefault = 1, \nReturns = 2,\
+          \ \nCustomerCare = 3, \nShipping = 4 \n"
+        $ref: "#/definitions/NoteGroup"
+      NoteDate:
+        description: "Note date"
+        type: "string"
+        format: "date-time"
+      NoteAuthor:
+        description: "Note author"
+        type: "string"
+      AuthorDepartment:
+        description: "Author department"
+        type: "string"
+      NoteMessage:
+        description: "Note message"
+        type: "string"
+      HighPriority:
+        description: "High priority?"
+        type: "boolean"
+      WarehouseCountNumber:
+        description: "Warehouse count number"
+        type: "integer"
+  OrderGrade:
+    description: "Order grade object"
+    type: "object"
+    properties:
+      OrderGradeID:
+        description: "Order grade ID"
+        type: "integer"
+      GradeDetails:
+        description: "Grade details"
+        type: "string"
+      LastUpdateUTC:
+        description: "Last update date UTC"
+        type: "string"
+        format: "date-time"
+      Status:
+        description: "GradingStatus Enum\nNone = 0,\nApprove = 1,\nDecline = 2,\n\
+          Review = 3\n"
+        $ref: "#/definitions/GradingStatus"
+      UserID:
+        description: "User ID"
+        type: "integer"
+      Generic1:
+        description: "Generic 1"
+        type: "string"
+      Generic2:
+        description: "Generic 2"
+        type: "string"
+      Generic3:
+        description: "Generic 3"
+        type: "string"
+      Generic4:
+        description: "Generic 4"
+        type: "string"
+      Generic5:
+        description: "Generic 5"
+        type: "string"
+  WholeOrderCustomAttributeExport:
+    description: "Whole order custom attribute export"
+    type: "object"
+    properties:
+      Name:
+        description: "Name"
+        type: "string"
+      Value:
+        description: "Value"
+        type: "string"
+      IsUxVisible:
+        description: "Is Ux Visible?"
+        type: "boolean"
+  ExportGiftCard:
+    description: "Export gift cards"
+    type: "object"
+    properties:
+      ID:
+        description: "ID"
+        type: "integer"
+      ExternalItemID:
+        description: "External item ID"
+        type: "string"
+      PaymentTransactions:
+        description: "Collection of Payment Transactions"
+        type: "array"
+        items:
+          $ref: "#/definitions/ExportGiftCardPaymentTransaction"
+      Totals:
+        description: "Totals"
+        $ref: "#/definitions/ExportTotalInformation"
+      GiftCardType:
+        description: "GiftCardType enum\nEGift = 1,\nPhysicalGift = 2\n"
+        $ref: "#/definitions/GiftCardType"
+      Message:
+        description: "Message"
+        type: "string"
+      FromEmail:
+        description: "From email"
+        type: "string"
+      FromName:
+        description: "From name"
+        type: "string"
+      OrderTransactionIdentifier:
+        description: "Order transaction identifier"
+        type: "integer"
+      ToEmail:
+        description: "To email"
+        type: "string"
+      PaymentError:
+        description: "Payment error?"
+        type: "boolean"
+      PaymentApplied:
+        description: "Payment applied?"
+        type: "boolean"
+      Processed:
+        description: "Processed?"
+        type: "boolean"
+      GiftCardPinNumber:
+        description: "Gift card PIN number"
+        type: "string"
+      GiftCardNumber:
+        description: "Gift card number"
+        type: "string"
+      OrderItemID:
+        description: "Order item ID"
+        type: "integer"
+      OrderID:
+        description: "Order ID"
+        type: "integer"
+      ToName:
+        description: "To name"
+        type: "string"
+      DeliveryType:
+        description: "ExportOrderItemDeliveryType enum\nWarehouseShip = 1,\nOmniPickup\
+          \ = 2,\nOmniShip = 3\n"
+        $ref: "#/definitions/ExportOrderItemDeliveryType"
+  ExportGiftCardPaymentTransaction:
+    description: "Gift card payment transaction"
+    type: "object"
+    properties:
+      ID:
+        description: "ID"
+        type: "integer"
+      OrderGiftCardID:
+        description: "Order gift card ID"
+        type: "integer"
+      OrderPaymentID:
+        description: "Order payment ID"
+        type: "integer"
+      PaymentTransactionID:
+        description: "Payment transaction IDs"
+        type: "integer"
+      Amount:
+        description: "Amount"
+        type: "number"
+  ExportTotalInformation:
+    description: "Total information"
+    type: "object"
+    properties:
+      MerchandiseNetTotal:
+        description: "Merchandise net total"
+        type: "number"
+      MerchandiseGrossTotal:
+        description: "Merchandise gross total"
+        type: "number"
+      AdjustedMerchandiseNetTotal:
+        description: "Adjusted merchandise net total"
+        type: "number"
+      AdjustedMerchandiseGrossTotal:
+        description: "Adjusted merchanse gross total"
+        type: "number"
+      ShippingNetTotal:
+        description: "Shipping net total"
+        type: "number"
+      ShippingGrossTotal:
+        description: "Shipping gross total"
+        type: "number"
+      AdjustedShippingNetTotal:
+        description: "Adjusted shipping net total"
+        type: "number"
+      AdjustedShippingGrossTotal:
+        description: "Adjusted shipping gross total"
+        type: "number"
+      TotalNetTotal:
+        description: "Total net total"
+        type: "number"
+      TotalGrossTotal:
+        description: "Total gross total"
+        type: "number"
+      ProcessingFee:
+        description: "Processing fee"
+        type: "number"
+  GiftCardsIssued:
+    description: "Gift cards issued object"
+    type: "object"
+    properties:
+      OrderGiftCardID:
+        description: "Order gift card ID"
+        type: "integer"
+      GiftCardIssuedID:
+        description: "Gift card issued ID"
+        type: "integer"
+      GiftCardNumber:
+        description: "Gift card number"
+        type: "string"
+      GiftCardPinNumber:
+        description: "Gift card PIN number"
+        type: "string"
+      ToEmail:
+        description: "To email"
+        type: "string"
+      SiteID:
+        description: "Site ID"
+        type: "integer"
+      OrderID:
+        description: "Order ID"
+        type: "integer"
+      GiftCardTypeID:
+        description: "GiftCardType enum\nEGift = 1,\nPhysicalGift = 2\n"
+        $ref: "#/definitions/GiftCardType"
+      OrderReturnID:
+        description: "Order return ID"
+        type: "integer"
+      ReturnCountNumber:
+        description: "Return count number"
+        type: "integer"
+      Amount:
+        description: "Amount"
+        type: "number"
+  OrderShipping:
+    description: "Order shipping object"
+    type: "object"
+    properties:
+      OrderShippingID:
+        description: "Order shipping ID"
+        type: "integer"
+      ReferenceID:
+        description: "Reference ID"
+        type: "integer"
+      ShippingMethodID:
+        description: "Shipping method ID"
+        type: "integer"
+      OrderID:
+        description: "Order ID"
+        type: "integer"
+      NetTotal:
+        description: "Net total"
+        type: "number"
+      GrossTotal:
+        description: "Gross total"
+        type: "number"
+      AdjustedNetTotal:
+        description: "Adjusted net total"
+        type: "number"
+      AdjustedGrossTotal:
+        description: "Adjusted gross total"
+        type: "number"
+      Taxes:
+        description: "Collection of Order Shipping Tax"
+        type: "array"
+        items:
+          $ref: "#/definitions/OrderShippingTax"
+  OrderShippingTax:
+    description: "Order shipping tax object"
+    type: "object"
+    properties:
+      OrderShippingTaxID:
+        description: "Order shipping tax ID"
+        type: "integer"
+      TaxTypeID:
+        description: "Tax type ID"
+        type: "integer"
+      TaxType:
+        description: "TaxTypes enum       \nUSSalesTotal = 1,\nUSShippingTotal = 2,\n\
+          VAT = 3,\nVATShipping = 4,\nGST = 5,\nGSTShipping = 6,\nPST = 7,\nPSTShipping\
+          \ = 8,\nHST = 9,\nHSTShipping = 10,\nGSTVAT = 11,\nGSTShippingVAT = 12,\n\
+          Net = 13,\nNetShipping = 14,\nQST = 15,\nQSTShipping = 16\n"
+        $ref: "#/definitions/TaxTypes"
+      Amount:
+        description: "Amount"
+        type: "number"
+      Rate:
+        description: "Rate"
+        type: "number"
+      IsVat:
+        description: "Is Vat?"
+        type: "boolean"
+      Description:
+        description: "Description"
+        type: "string"
+      TaxExempt:
+        description: "Tax exempt?"
+        type: "boolean"
+      RecalcTax:
+        description: "Recalc tax"
+        type: "number"
+  ExportShipment:
+    description: "Export shipment object"
+    type: "object"
+    properties:
+      SimpleTotals:
+        description: "Simple totals"
+        $ref: "#/definitions/ISimpleTotalInformation"
+      TaxServiceError:
+        description: "Tax service error?"
+        type: "boolean"
+      TrackingNumber:
+        description: "Tracking number"
+        type: "string"
+      OrderShipmentID:
+        description: "Order shipment ID"
+        type: "integer"
+      OrderID:
+        description: "Order ID"
+        type: "integer"
+      Shipped:
+        description: "Shipped?"
+        type: "boolean"
+      DateShipped:
+        description: "Date shipped"
+        type: "string"
+        format: "date-time"
+      SendEmailWhenShipped:
+        description: "Send email when shipped?"
+        type: "boolean"
+      ShippingMethodID:
+        description: "Shipping method ID"
+        type: "integer"
+      ShippingMethod:
+        description: "Shipping method"
+        type: "string"
+      ShippingAddressID:
+        description: "Shipping address ID"
+        type: "integer"
+      Items:
+        description: "Collection of IShipmentItem"
+        type: "array"
+        items:
+          $ref: "#/definitions/IShipmentItem"
+      ItemsAll:
+        description: "Collection of IShipmentItem"
+        type: "array"
+        items:
+          $ref: "#/definitions/IShipmentItem"
+      GroupedShipmentItems:
+        description: "Collection of IGroupedShipmentItem"
+        type: "array"
+        items:
+          $ref: "#/definitions/IGroupedShipmentItem"
+      PaymentTransaction:
+        description: "Collection of IShipmentPaymentTransaction"
+        type: "array"
+        items:
+          $ref: "#/definitions/IShipmentPaymentTransaction"
+  ISimpleTotalInformation:
+    description: "ISimpleTotalInformation object"
+    type: "object"
+    properties:
+      SubTotal:
+        description: "Subtotal of order (total of all merchandise)"
+        type: "number"
+      OriginalShipping:
+        description: "Original shipping before shipping discounts, any shipping taxes"
+        type: "number"
+      Shipping:
+        description: "Final shipping price after shipping discounts, but before any\
+          \ shipping taxes"
+        type: "number"
+      Discount:
+        description: "Amount of order discounts on an order"
+        type: "number"
+      Tax:
+        description: "All item and shipping level taxes"
+        type: "number"
+      Total:
+        description: "Total after all discounts and taxes"
+        type: "number"
+      ProcessingFee:
+        description: "Processing fee"
+        type: "number"
+      TaxDetails:
+        description: "List of taxes ( total of item tax + shipping tax for the object\
+          \ that the simple total was created for)"
+        type: "array"
+        items:
+          $ref: "#/definitions/ITaxDetail"
+  ITaxDetail:
+    description: "ITaxDetail object"
+    type: "object"
+    properties:
+      TaxType:
+        description: "Tax type"
+        type: "string"
+      TotalAmount:
+        description: "Total amount"
+        type: "number"
+  IShipmentItem:
+    description: "IShipmentItem object"
+    type: "object"
+    properties:
+      OrderShipmentID:
+        description: "Order shipment ID"
+        type: "integer"
+      OrderItemID:
+        description: "Order item ID"
+        type: "integer"
+      Tracking:
+        description: "Tracking"
+        type: "string"
+      InternalItemStatusCode:
+        description: "Internal item status code"
+        type: "string"
+      MarkForDeletion:
+        description: "Mark for deletion?"
+        type: "boolean"
+      ShippingErrorID:
+        description: "Shipping error ID"
+        type: "integer"
+      DeliveredDateUTC:
+        description: "Delivered date UTC"
+        type: "string"
+        format: "date-time"
+  IGroupedShipmentItem:
+    description: "IGroupedShipmentItem object"
+    type: "object"
+    properties:
+      DeckSKU:
+        description: "Deck SKU"
+        type: "string"
+      Description:
+        description: "Description"
+        type: "string"
+      Quantity:
+        description: "Quantity"
+        type: "integer"
+      OrderItemIds:
+        description: "Collection of Order item IDs"
+        type: "array"
+        items:
+          type: "integer"
+      PriceDisplay:
+        description: "Item price from the website with the currency sign"
+        type: "string"
+      Discount:
+        description: "Item total discount"
+        type: "number"
+      TotalPriceDisplay:
+        description: "Item total [(price - discount) * quantity] with the currency\
+          \ sign"
+        type: "string"
+      TrackingNumber:
+        description: "Tracking number"
+        type: "string"
+      DeliveredDateUTC:
+        description: "Delivered date UTC"
+        type: "string"
+        format: "date-time"
+  IShipmentPaymentTransaction:
+    description: "IShipmentPaymentTransaction object"
+    type: "object"
+    properties:
+      ID:
+        description: "ID"
+        type: "integer"
+      IsChanged:
+        description: "Is changed?"
+        type: "boolean"
+      OrderShipmentID:
+        description: "Order shipment ID"
+        type: "integer"
+      PaymentTransactionID:
+        description: "Payment transaction ID"
+        type: "integer"
+      Amount:
+        description: "Amount"
+        type: "number"
+      OrderPaymentID:
+        description: "Order Payment ID"
+        type: "integer"
+      PaymentApplied:
+        description: "Payment applied?"
+        type: "boolean"
+      DateCreated:
+        description: "Date created"
+        type: "string"
+        format: "date-time"
+  Return:
+    description: "Return object"
+    type: "object"
+    properties:
+      OrderReturnID:
+        description: "Order return ID"
+        type: "integer"
+      OrderID:
+        description: "Order ID"
+        type: "integer"
+      DateReturned:
+        description: "Date returned"
+        type: "string"
+        format: "date-time"
+      Items:
+        description: "Collection of return items"
+        type: "array"
+        items:
+          $ref: "#/definitions/IReturnItem"
+      PaymentTransactions:
+        description: "Collection of return payment transactions"
+        type: "array"
+        items:
+          $ref: "#/definitions/IReturnPaymentTransaction"
+      OrderTransactionIdentifier:
+        description: "Order transaction identifier"
+        type: "integer"
+      ReturnCountNumber:
+        description: "Return count number"
+        type: "integer"
+      PaymentApplied:
+        description: "Payment applied?"
+        type: "boolean"
+      PaymentError:
+        description: "Payment error?"
+        type: "boolean"
+      PaymentPending:
+        description: "Payment pending?"
+        type: "boolean"
+      ReturnInvoiceNumber:
+        description: "Return invoice number"
+        type: "string"
+      Totals:
+        description: "ITotalInformation object"
+        $ref: "#/definitions/ITotalInformation"
+      Taxes:
+        description: "Collection of IReturnTax"
+        type: "array"
+        items:
+          $ref: "#/definitions/IReturnTax"
+      GiftCardIssued:
+        description: "Collection of GiftCardsIssued"
+        type: "array"
+        items:
+          $ref: "#/definitions/GiftCardsIssued"
+  IReturnItem:
+    description: "IReturnItem object"
+    type: "object"
+    properties:
+      OrderItemID:
+        description: "Order item ID"
+        type: "integer"
+      ReturnReason:
+        description: "Return reason"
+        type: "string"
+      ReturnType:
+        description: "Return type"
+        type: "string"
+      ReturnReasonText:
+        description: "Return reason text/json"
+        type: "string"
+  IReturnPaymentTransaction:
+    description: "IReturnPaymentTransaction object"
+    type: "object"
+    properties:
+      ID:
+        description: "ID"
+        type: "integer"
+      IsChanged:
+        description: "Is changed?"
+        type: "boolean"
+      OrderReturnID:
+        description: "Order return ID"
+        type: "integer"
+      PaymentTransactionID:
+        description: "Payment transaction ID"
+        type: "integer"
+      Amount:
+        description: "Amount"
+        type: "number"
+      OrderPaymentID:
+        description: "Order payment ID"
+        type: "integer"
+      PaymentApplied:
+        description: "Payment applied?"
+        type: "boolean"
+      DateCreated:
+        description: "Date created"
+        type: "string"
+        format: "date-time"
+  ITotalInformation:
+    description: "ITotalInformation object"
+    type: "object"
+    properties:
+      MerchandiseNetTotal:
+        description: "Total merchandise price before taxes"
+        type: "number"
+      MerchandiseGrossTotal:
+        description: "Total merchandise price after taxes"
+        type: "number"
+      AdjustedMerchandiseNetTotal:
+        description: "Total merchandise price after discounts, but before taxes"
+        type: "number"
+      AdjustedMerchandiseGrossTotal:
+        description: "Total merchandise price after discounts and after taxes"
+        type: "number"
+      ShippingNetTotal:
+        description: "Shipping cost before taxes"
+        type: "number"
+      ShippingGrossTotal:
+        description: "Shipping cost after shipping taxes"
+        type: "number"
+      AdjustedShippingNetTotal:
+        description: "Shipping cost after discounts but before taxes"
+        type: "number"
+      AdjustedShippingGrossTotal:
+        description: "Shipping cost after discounts and after shipping taxes"
+        type: "number"
+      TotalNetTotal:
+        description: "Total before taxes. Equals\nAdjusted Merchandise Net +\nAdjusted\
+          \ Shipping Net +\nProcessing Fee\n"
+        type: "number"
+      TotalGrossTotal:
+        description: "Total after taxes. Equals\nAdjusted Merchandise Gross +\nAdjusted\
+          \ Shipping Gross\n"
+        type: "number"
+      ProcessingFee:
+        description: "Processing fees"
+        type: "number"
+  IReturnTax:
+    description: "IReturnTax object"
+    type: "object"
+    properties:
+      ID:
+        description: "ID"
+        type: "integer"
+      OrderReturnID:
+        description: "Order return ID"
+        type: "integer"
+      TaxType:
+        description: "TaxTypes enum\nUSSalesTotal = 1,\nUSShippingTotal = 2,\nVAT\
+          \ = 3,\nVATShipping = 4,\nGST = 5,\nGSTShipping = 6,\nPST = 7,\nPSTShipping\
+          \ = 8,\nHST = 9,\nHSTShipping = 10,\nGSTVAT = 11,\nGSTShippingVAT = 12,\n\
+          Net = 13,\nNetShipping = 14,\nQST = 15,\nQSTShipping = 16\n"
+        $ref: "#/definitions/TaxTypes"
+      Amount:
+        description: "Amount"
+        type: "number"
+  WholeOrderItemExport:
+    description: "WholeOrderItemExport object"
+    type: "object"
+    properties:
+      TaxCode:
+        description: "Tax code"
+        type: "string"
+      GetItemExtendedHash:
+        description: "Get item extended hash"
+        type: "string"
+      ItemTypeID:
+        description: "Item type ID"
+        type: "integer"
+      EstimatedShipDate:
+        description: "Estimated ship date"
+        type: "string"
+        format: "date-time"
+      EndEstimatedShipDate:
+        description: "End estimated ship date"
+        type: "string"
+        format: "date-time"
+      ItemStatusChangeDate:
+        description: "Item status change date"
+        type: "string"
+        format: "date-time"
+      ProcessOnDateUTC:
+        description: "Process on date UTC"
+        type: "string"
+        format: "date-time"
+      RequestedDeliveryDateUTC:
+        description: "Requested delivery date UTC"
+        type: "string"
+        format: "date-time"
+      CustomerSKU:
+        description: "Customer SKU"
+        type: "string"
+      ReturnAuthNumber:
+        description: "Return auth number"
+        type: "string"
+      GiftMessage:
+        description: "Gift message"
+        type: "string"
+      Extended:
+        description: "Collection of WholeOrderExtendedExport objects"
+        type: "array"
+        items:
+          $ref: "#/definitions/WholeOrderExtendedExport"
+      ExtendedInternal:
+        description: "Collection of internal WholeOrderExtendedExport objects"
+        type: "array"
+        items:
+          $ref: "#/definitions/WholeOrderExtendedExport"
+      AlternateStyle:
+        description: "Alternate style"
+        type: "string"
+      ReturnTypeID:
+        description: "Return type ID"
+        type: "integer"
+      ReturnReasonID:
+        description: "Return reason ID"
+        type: "integer"
+      ReturnReasonText:
+        description: "Return reason text/json"
+        type: "string"
+      ShippingErrorID:
+        description: "Shipping error ID"
+        type: "integer"
+      ShippingProblemID:
+        description: "Shipping problem ID"
+        type: "integer"
+      SendReplacement:
+        description: "Send replacement?"
+        type: "boolean"
+      IsExpectingPayment:
+        description: "Is expecting payment?"
+        type: "boolean"
+      IsExpectingReturn:
+        description: "Is expecting return?"
+        type: "boolean"
+      IsChanged:
+        description: "Is changed?"
+        type: "boolean"
+      ID:
+        description: "ID"
+        type: "integer"
+      ExternalItemID:
+        description: "External item ID"
+        type: "string"
+      OrderID:
+        description: "Order ID"
+        type: "integer"
+      ItemStatusID:
+        description: "Item status ID"
+        type: "integer"
+      ItemStatusName:
+        description: "Item status name"
+        type: "string"
+      ItemStatusCode:
+        description: "Item status code"
+        type: "string"
+      ItemTypeLocalizeName:
+        description: "Item type localize name"
+        type: "string"
+      GTIN:
+        description: "GTIN"
+        type: "string"
+      DeckSKU:
+        description: "Deck SKU"
+        type: "string"
+      StyleNumber:
+        description: "Style number"
+        type: "string"
+      MasterNumber:
+        description: "Master number"
+        type: "string"
+      ProductSize:
+        description: "Product size"
+        type: "string"
+      Attribute:
+        description: "Attribute"
+        type: "string"
+      NewRoutingID:
+        description: "New routing ID"
+        type: "integer"
+      RoutingID:
+        description: "Routing ID"
+        type: "integer"
+      Route:
+        description: "Route"
+        type: "string"
+      WarehouseCode:
+        description: "Warehouse code"
+        type: "string"
+      WarhousePostalCode:
+        description: "Warehouse postal code"
+        type: "string"
+      GrossPrice:
+        description: "Gross price"
+        type: "number"
+      NetPrice:
+        description: "Net price"
+        type: "number"
+      Custom1:
+        description: "Custom 1"
+        type: "string"
+      Custom2:
+        description: "Custom 2"
+        type: "string"
+      Custom3:
+        description: "Custom 3"
+        type: "string"
+      Custom4:
+        description: "Custom 4"
+        type: "string"
+      Custom5:
+        description: "Custom 5"
+        type: "string"
+      ImageURL:
+        description: "Image URL"
+        type: "string"
+      MSRP:
+        description: "MSRP"
+        type: "number"
+      OrderShippingID:
+        description: "Order shipping ID"
+        type: "integer"
+      ShippingReferenceID:
+        description: "Shipping reference ID"
+        type: "integer"
+      OrderItemTaxes:
+        description: "Order item taxes"
+        type: "array"
+        items:
+          $ref: "#/definitions/WholeOrderOrderItemTaxExport"
+      OrderItemAdjustments:
+        description: "Order item adjustments"
+        type: "array"
+        items:
+          $ref: "#/definitions/WholeOrderOrderItemAdjustmentExport"
+      DeliveryType:
+        description: "\tDeliveryType enum\n    WarehouseShip = 1,\n    OmniPickup\
+          \ = 2,\n    OmniShip = 3\n"
+        $ref: "#/definitions/ExportOrderItemDeliveryType"
+      MarketingPrice:
+        description: "Marketing price"
+        type: "number"
+      MarketingText:
+        description: "Marketing text/json"
+        type: "string"
+      TotalNonAdvancedGrossAdjustments:
+        description: "Total non advanced gross adjustments"
+        type: "number"
+      TotalGrossAdjustments:
+        description: "Total gross adjustments"
+        type: "number"
+      TotalNonAdvancedNetAdjustments:
+        description: "Total non advanced net adjustments"
+        type: "number"
+      TotalNetAdjustments:
+        description: "Total net adjustments"
+        type: "number"
+      TaxExempt:
+        description: "Tax exempt?"
+        type: "boolean"
+      TaxExemptStringList:
+        description: "Collection of tax exempt strings"
+        type: "array"
+        items:
+          type: "string"
+      ShippingMethodID:
+        description: "Shipping method ID"
+        type: "integer"
+      ShippingMethodDescription:
+        description: "Shipping method description"
+        type: "string"
+      PaymentID:
+        description: "Payment ID"
+        type: "integer"
+      InitialItemStatusID:
+        description: "Initial item status ID"
+        type: "integer"
+      Returnable:
+        description: "Returnable?"
+        type: "boolean"
+  WholeOrderExtendedExport:
+    description: "Whole order extended export object"
+    type: "object"
+    properties:
+      ID:
+        description: "ID"
+        type: "integer"
+      Key:
+        description: "Key"
+        type: "string"
+      Value:
+        description: "Value"
+        type: "string"
+      Additional:
+        description: "Additional"
+        type: "string"
+  WholeOrderOrderItemTaxExport:
+    description: "Whole order, order item tax export object"
+    type: "object"
+    properties:
+      ID:
+        description: "ID"
+        type: "integer"
+      TaxTypes:
+        description: "Tax types enum\nUSSalesTotal = 1,\nUSShippingTotal = 2,\nVAT\
+          \ = 3,\nVATShipping = 4,\nGST = 5,\nGSTShipping = 6,\nPST = 7,\nPSTShipping\
+          \ = 8,\nHST = 9,\nHSTShipping = 10,\nGSTVAT = 11,\nGSTShippingVAT = 12,\n\
+          Net = 13,\nNetShipping = 14,\nQST = 15,\nQSTShipping = 16\n"
+        $ref: "#/definitions/TaxTypes"
+      IsVat:
+        description: "Is VAT?"
+        type: "boolean"
+      Amount:
+        description: "Amount"
+        type: "number"
+      Rate:
+        description: "Rate"
+        type: "number"
+      Description:
+        description: "Description"
+        type: "string"
+      TaxExempt:
+        description: "Tax exempt?"
+        type: "boolean"
+  WholeOrderOrderItemAdjustmentExport:
+    description: "Whole order, order item adjustment export"
+    type: "object"
+    properties:
+      ID:
+        description: "ID"
+        type: "integer"
+      NetPrice:
+        description: "Net price"
+        type: "number"
+      GrossPrice:
+        description: "Gross price"
+        type: "number"
+      PromotionID:
+        description: "Promotion ID"
+        type: "string"
+      DiscountText:
+        description: "Discount text/json"
+        type: "string"
+      CouponCode:
+        description: "Coupon code"
+        type: "string"
+      AdjustmentType:
+        description: "Adjustment type"
+        $ref: "#/definitions/AdjustmentTypes"
+  AdjustmentTypes:
+    description: "AdjustmentTypes enum\nItemDiscount = 1,\nOrderDiscount = 2,\nShippingDiscount\
+      \ = 3,\nItemManualCredit = 4,\nItemManualCharge = 5,\nOrderManualCredit = 6,\n\
+      OrderManualCharge = 7,\nShippingManualCredit = 8,\nShippingManualCharge = 9,\n\
+      AdvancedCapture = 10,\nAdvancedCredit = 11,\nItemProratedDiscount = 12,\nReturnHandlingFee\
+      \ = 13,\nReturnCreditReversal = 14, \nGiftCardRedemptionBalanceCharge = 15,\n\
+      ReturnShippingFee = 16\n"
+    type: "integer"
+    enum:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    - 14
+    - 15
+    - 16
+  ExportOrderAdjustment:
+    description: "Export order adjustment object"
+    type: "object"
+    properties:
+      ID:
+        description: "ID"
+        type: "integer"
+      AdjustmentType:
+        description: "ExportAdjustmentType enum\nItemDiscount = 1,\nOrderDiscount\
+          \ = 2,\nShippingDiscount = 3,\nItemManualCredit = 4,\nItemManualCharge =\
+          \ 5,\nOrderManualCredit = 6,\nOrderManualCharge = 7,\nShippingManualCredit\
+          \ = 8,\nShippingManualCharge = 9,\nAdvancedCapture = 10,\nAdvancedCredit\
+          \ = 11,\nItemProratedDiscount = 12,\nReturnHandlingFee = 13,\nReturnCreditReversal\
+          \ = 14,\nReturnShippingFee = 15\n"
+        $ref: "#/definitions/ExportAdjustmentType"
+      NetPrice:
+        description: "Net price"
+        type: "number"
+      GrossPrice:
+        description: "Gross price"
+        type: "number"
+      PromotionID:
+        description: "Promotion ID"
+        type: "string"
+      CampaignID:
+        description: "Campaign ID"
+        type: "string"
+      DiscountText:
+        description: "Discount text/json"
+        type: "string"
+      CouponCode:
+        description: "Coupon code"
+        type: "string"
+      PaymentTransactions:
+        description: "Collection of payment transactions"
+        type: "array"
+        items:
+          $ref: "#/definitions/ExportOrderAdjustmentPaymentTransaction"
+      OrderPayments:
+        description: "Collection of order payments"
+        type: "array"
+        items:
+          $ref: "#/definitions/WholeOrderOrderPaymentExport"
+  ExportOrderAdjustmentPaymentTransaction:
+    description: "Export order, adjustment payment transaction"
+    type: "object"
+    properties:
+      ID:
+        description: "ID"
+        type: "integer"
+      OrderAdjustmentID:
+        description: "Order adjustment ID"
+        type: "integer"
+      PaymentTransactionID:
+        description: "Payment transaction ID"
+        type: "integer"
+      Amount:
+        description: "Amount"
+        type: "number"
+      OrderPaymentID:
+        description: "Order payment ID"
+        type: "integer"
+      PaymentError:
+        description: "Payment error?"
+        type: "boolean"
+  WholeOrderOrderPaymentExport:
+    description: "Whole order, order payment export"
+    type: "object"
+    properties:
+      ID:
+        description: "ID"
+        type: "integer"
+      OrderID:
+        description: "Order ID"
+        type: "integer"
+      PaymentProcessorID:
+        description: "Payment processor ID"
+        type: "integer"
+      PaymentProcessor:
+        description: "Name of the Payment Processor"
+        type: "string"
+      PaymentSubType:
+        description: "Payment sub type"
+        type: "string"
+      AuthorizedAmount:
+        description: "Authorized amount"
+        type: "number"
+      CapturedAmount:
+        description: "Captured amount"
+        type: "number"
+      EarlyCaptureAmount:
+        description: "Early capture amount"
+        type: "number"
+      EarlyUsedAmount:
+        description: "Early used amount"
+        type: "number"
+      EarlyCreditAmount:
+        description: "Early credit amount"
+        type: "number"
+      CreidtedAmount:
+        description: "Credited amount"
+        type: "number"
+      Generic1:
+        description: "Generic 1"
+        type: "string"
+      Generic2:
+        description: "Generic 2"
+        type: "string"
+      Generic3:
+        description: "Generic 3"
+        type: "string"
+      Generic4:
+        description: "Generic 4"
+        type: "string"
+      Generic5:
+        description: "Generic 5"
+        type: "string"
+      AmountAvailableForCapture:
+        description: "Amount available for capture"
+        type: "number"
+      AmountAvailableForCredit:
+        description: "Amount available for credit"
+        type: "number"
+      DateCreated:
+        description: "Date created"
+        type: "string"
+        format: "date-time"
+      CreditCard:
+        description: "Credit card"
+        $ref: "#/definitions/WholeOrderCreditCardExport"
+      PaymentToken:
+        description: "Payment token"
+        type: "string"
+      IsOriginalPayment:
+        description: "Is original payment?"
+        type: "boolean"
+      IsEarlyCapture:
+        description: "Is early capture?"
+        type: "boolean"
+      OrderItemIDs:
+        description: "Collection of order item IDs"
+        type: "array"
+        items:
+          type: "integer"
+      CreditCardIsCharged:
+        description: "Credit card is charged?"
+        type: "boolean"
+  WholeOrderCreditCardExport:
+    description: "Whole order, credit card export object"
+    type: "object"
+    properties:
+      CardType:
+        description: "Card type"
+        type: "string"
+      CardNumber:
+        description: "Only the last 4 numbers ever"
+        type: "string"
+      CardHolder:
+        description: "Card holder"
+        type: "string"
+      ExpirationMonth:
+        description: "Expiration month"
+        type: "integer"
+      ExpirationYear:
+        description: "Expiration year"
+        type: "integer"
+  WholeOrderOrderTaxExport:
+    description: "Whole order, order tax export object"
+    type: "object"
+    properties:
+      ID:
+        description: "ID"
+        type: "integer"
+      TaxType:
+        description: "TaxTypes enum\nUSSalesTotal = 1,\nUSShippingTotal = 2,\nVAT\
+          \ = 3,\nVATShipping = 4,\nGST = 5,\nGSTShipping = 6,\nPST = 7,\nPSTShipping\
+          \ = 8,\nHST = 9,\nHSTShipping = 10,\nGSTVAT = 11,\nGSTShippingVAT = 12,\n\
+          Net = 13,\nNetShipping = 14,\nQST = 15,\nQSTShipping = 16\n"
+        $ref: "#/definitions/TaxTypes"
+      IsVat:
+        description: "Is VAT?"
+        type: "boolean"
+      Amount:
+        description: "Amount"
+        type: "number"
+      Rate:
+        description: "Rate"
+        type: "number"
+      Description:
+        description: "Description"
+        type: "string"
+      TaxExempt:
+        description: "Tax exempt?"
+        type: "boolean"
+  OrderStatus:
+    description: "Order Status enum\nNew = 1,\nCancelled = 2,\nReview = 3,\nPending\
+      \ = 4,\nException = 5,\nComplete = 6,\nFraud = 7,\nManualReview = 8,\nPendingSettlement\
+      \ = 9,\nDelayedAutoProcess = 10,\nConfirmedFraud = 11,\nChargeback = 12,\nReverseChargeback\
+      \ = 13\n"
+    type: "integer"
+    enum:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+  WholeOrderOmsAddressExport:
+    description: "Whole order, OMS address export object"
+    type: "object"
+    properties:
+      ID:
+        description: "ID"
+        type: "integer"
+      IsChanged:
+        description: "Is changed?"
+        type: "boolean"
+      FirstName:
+        description: "First name"
+        type: "string"
+      PhoneticFirstName:
+        description: "Phonetic first name"
+        type: "string"
+      LastName:
+        description: "Last name"
+        type: "string"
+      PhoneticLastName:
+        description: "Phonetic last name"
+        type: "string"
+      Address1:
+        description: "Address 1"
+        type: "string"
+      Address2:
+        description: "Address 2"
+        type: "string"
+      Address3:
+        description: "Address 3"
+        type: "string"
+      City:
+        description: "City"
+        type: "string"
+      Province:
+        description: "Province"
+        type: "string"
+      PostalCode:
+        description: "Postal code"
+        type: "string"
+      Country:
+        description: "Country"
+        type: "string"
+      Email:
+        description: "Email"
+        type: "string"
+      Phone:
+        description: "Phone"
+        type: "string"
+      MobilePhone:
+        description: "Mobile phone"
+        type: "string"
+      CompanyName:
+        description: "Company name"
+        type: "string"
+      Salutation:
+        description: "Salutation"
+        type: "string"
+      Suffix:
+        description: "Suffix"
+        type: "string"
+      GeoLatitude:
+        description: "Geo latitude"
+        type: "number"
+      GeoLongitude:
+        description: "Geo longitude"
+        type: "number"
+  AccessHistory:
+    description: "Access history object"
+    type: "object"
+    properties:
+      UserName:
+        description: "User name"
+        type: "string"
+      Type:
+        description: "AccessType enum\nOrder = 1,\nPayment = 2\n"
+        $ref: "#/definitions/AccessType"
+      ResourceID:
+        description: "Resource ID"
+        type: "integer"
+      AccessTime:
+        description: "Access time"
+        type: "string"
+        format: "date-time"
+  WholeOrderTotalInformationExport:
+    description: "Whole order, total information export"
+    type: "object"
+    properties:
+      MerchandiseNetTotal:
+        description: "Merchandise net total"
+        type: "number"
+      MerchandiseGrossTotal:
+        description: "Merchandise gross total"
+        type: "number"
+      AdjustedMerchandiseNetTotal:
+        description: "Adjusted merchandise net total"
+        type: "number"
+      AdjustedMerchandiseGrossTotal:
+        description: "Adjusted merchandise gross total"
+        type: "number"
+      ShippingNetTotal:
+        description: "Shipping net total"
+        type: "number"
+      ShippingGrossTotal:
+        description: "Shipping gross total"
+        type: "number"
+      AdjustedShippingNetTotal:
+        description: "Adjusted shipping net total"
+        type: "number"
+      AdjustedShippingGrossTotal:
+        description: "Adjusted shipping gross total"
+        type: "number"
+      TotalNetTotal:
+        description: "Total net total"
+        type: "number"
+      TotalGrossTotal:
+        description: "Total gross total"
+        type: "number"
+      ProcessingFee:
+        description: "Processing fee"
+        type: "number"
+  WholeOrderSimpleTotalInformationExport:
+    description: "Whole order, simple total information export"
+    type: "object"
+    properties:
+      SubTotal:
+        description: "Sub total"
+        type: "number"
+      OriginalShipping:
+        description: "Original shipping"
+        type: "number"
+      Shipping:
+        description: "Shipping"
+        type: "number"
+      Discount:
+        description: "Discount"
+        type: "number"
+      Tax:
+        description: "Tax"
+        type: "number"
+      Total:
+        description: "Total"
+        type: "number"
+      ProcessingFee:
+        description: "Processing fee"
+        type: "number"
+      TaxDetails:
+        description: "Collection of WholeOrderTaxDetailExport objects"
+        type: "array"
+        items:
+          $ref: "#/definitions/WholeOrderTaxDetailExport"
+  WholeOrderTaxDetailExport:
+    description: "Whole order, tax detail report"
+    type: "object"
+    properties:
+      TaxType:
+        description: "Tax type"
+        type: "string"
+      TotalAmount:
+        description: "Total amount"
+        type: "number"
+  WholeOrderShipmentExport:
+    description: "Whole order, shipment export"
+    type: "object"
+    properties:
+      SimpleTotals:
+        description: "Simple totals"
+        $ref: "#/definitions/WholeOrderSimpleTotalInformationExport"
+      TrackingNumber:
+        description: "Tracking number"
+        type: "string"
+      OrderShipmentID:
+        description: "Order shipment ID"
+        type: "integer"
+      OrderID:
+        description: "Order ID"
+        type: "integer"
+      Shipped:
+        description: "Shipped?"
+        type: "boolean"
+      DateShipped:
+        description: "Date shipped"
+        type: "string"
+        format: "date-time"
+      SendEmailWhenShipped:
+        description: "Send email when shipped?"
+        type: "boolean"
+      ShippingMethodID:
+        description: "Shipping method ID"
+        type: "integer"
+      ShippingMethod:
+        description: "Shipping method"
+        type: "string"
+      ShippingAddressID:
+        description: "Shipping address ID"
+        type: "integer"
+      Items:
+        description: "Collection of WholeOrderShipmentItemExport"
+        type: "array"
+        items:
+          $ref: "#/definitions/WholeOrderShipmentItemExport"
+      ItemsAll:
+        description: "Collection of IShipmentItem"
+        type: "array"
+        items:
+          $ref: "#/definitions/IShipmentItem"
+      GroupedShipmentItems:
+        description: "Collection of IGroupedShipmentItem"
+        type: "array"
+        items:
+          $ref: "#/definitions/IGroupedShipmentItem"
+      PaymentTransactions:
+        description: "Collection of WholeOrderShipmentPaymentTransactionExport"
+        type: "array"
+        items:
+          $ref: "#/definitions/WholeOrderShipmentPaymentTransactionExport"
+      OrderTransactionIdentifier:
+        description: "Order transaction identifier"
+        type: "integer"
+      WarehouseCountNumber:
+        description: "Warehouse count number"
+        type: "integer"
+      PaymentApplied:
+        description: "Payment applied?"
+        type: "boolean"
+      PaymentError:
+        description: "Payment error?"
+        type: "boolean"
+      PaymentPending:
+        description: "Payment pending?"
+        type: "boolean"
+      PODate:
+        description: "Purchase order date"
+        type: "string"
+        format: "date-time"
+      PONumber:
+        description: "Purchase order number"
+        type: "string"
+      InternalSalesNumber:
+        description: "Internal sales number"
+        type: "string"
+      InternalStatusCode:
+        description: "Internal status code"
+        type: "string"
+      WarehouseID:
+        description: "Warehouse ID"
+        type: "integer"
+      PaymentSkipped:
+        description: "Payment skipped?"
+        type: "boolean"
+      FolderIDs:
+        description: "Collection of folder IDs"
+        type: "array"
+        items:
+          type: "integer"
+      PathToShippingLabel:
+        description: "Path to shipping label"
+        type: "string"
+      PathToReturnShippingLabel:
+        description: "Path to return shipping label"
+        type: "string"
+      Totals:
+        description: "Totals"
+        $ref: "#/definitions/WholeOrderTotalInformationExport"
+      Taxes:
+        description: "Taxes"
+        $ref: "#/definitions/OrderShippingTax"
+      InvoiceNumber:
+        description: "Invoice number"
+        type: "string"
+  WholeOrderShipmentItemExport:
+    description: "Whole order, shipment item export"
+    type: "object"
+    properties:
+      OrderShipmentID:
+        description: "FK to order shipment"
+        type: "integer"
+      OrderShipmentItemID:
+        description: "PK for order shipment item"
+        type: "integer"
+      OrderItemID:
+        description: "FK to order item"
+        type: "integer"
+      Tracking:
+        description: "Tracking number for shipped item"
+        type: "string"
+      TrackingURI:
+        description: "Tracking URI"
+        type: "string"
+      InternalItemStatusCode:
+        description: "Internal item status code from ERP"
+        type: "string"
+      MarkForDeletion:
+        description: "Set this to mark item as deleted in database. Item will be hidden\
+          \ from application going forward."
+        type: "boolean"
+      ShippingErrorID:
+        description: "Shipping error reason select if item was processed as shipping\
+          \ error"
+        type: "integer"
+      DeliveredDateUTC:
+        description: "Delivered date UTC"
+        type: "string"
+        format: "date-time"
+  WholeOrderShipmentPaymentTransactionExport:
+    description: "Whole order, shipment payment transaction export"
+    type: "object"
+    properties:
+      ID:
+        description: "ID"
+        type: "integer"
+      OrderShipmentID:
+        description: "Order shipment ID"
+        type: "integer"
+      PaymentTransactionID:
+        description: "Payment transaction ID"
+        type: "integer"
+      Amount:
+        description: "Amount"
+        type: "number"
+      OrderPaymentID:
+        description: "Order payment ID"
+        type: "integer"
+      PaymentApplied:
+        description: "Payment applied?"
+        type: "boolean"
+      DateCreated:
+        description: "Date created"
+        type: "string"
+        format: "date-time"
+  WholeOrderExportReturnExport:
+    description: "Whole order export, return export"
+    type: "object"
+    properties:
+      SimpleTotals:
+        description: "Simple totals"
+        $ref: "#/definitions/WholeOrderSimpleTotalInformationExport"
+      ReturnProcessorSubType:
+        description: "Return processor sub type"
+        type: "string"
+      GiftCardIssued:
+        description: "Gift card issued"
+        $ref: "#/definitions/WholeOrderGiftCardIssuedExport"
+  WholeOrderGiftCardIssuedExport:
+    description: "Whole order, gift card issue export"
+    type: "object"
+    properties:
+      OrderGiftCardID:
+        description: "Order gift card ID"
+        type: "integer"
+      GiftCardIssuedID:
+        description: "Gift card issued ID"
+        type: "integer"
+      GiftCardNumber:
+        description: "Gift card number"
+        type: "string"
+      GiftCardPinNumber:
+        description: "Gift card pin number"
+        type: "string"
+      ToEmail:
+        description: "To email"
+        type: "string"
+      SiteID:
+        description: "Site ID"
+        type: "integer"
+      OrderID:
+        description: "Order ID"
+        type: "integer"
+      GiftCardTypeID:
+        description: "Gift Card Type ID enum EGift = 1, PhysicalGift = 2"
+        $ref: "#/definitions/GiftCardType"
+      OrderReturnID:
+        description: "Order return ID"
+        type: "integer"
+      ReturnCountNumber:
+        description: "Return count number"
+        type: "integer"
+      Amount:
+        description: "Amount"
+        type: "number"
+  IOrderInvoice:
+    description: "IOrderInvoice object"
+    type: "object"
+    properties:
+      OrderInvoiceID:
+        description: "Order invoice ID"
+        type: "integer"
+      OrderID:
+        description: "Order ID"
+        type: "integer"
+      Amount:
+        description: "Amount"
+        type: "number"
+      BillTo:
+        description: "Bill to"
+        type: "string"
+      InvoiceNumber:
+        description: "Invoice number"
+        type: "string"
+      InvoiceDateUTC:
+        description: "Invoice date UTC"
+        type: "string"
+        format: "date-time"
+      OrderShipmentID:
+        description: "Order shipment ID"
+        type: "integer"
+      OrderReturnID:
+        description: "Order return ID"
+        type: "integer"
+      OrderItemAdjustmentID:
+        description: "Order item adjustment ID"
+        type: "integer"
+      OrderAdjustmentID:
+        description: "Order adjustment ID"
+        type: "integer"
+  ExportOrderEmailSent:
+    description: "Export order email sent"
+    type: "object"
+    properties:
+      OrderEmailSentID:
+        description: "Unique OMS database Identifier for sent email record"
+        type: "integer"
+      TemplateName:
+        description: "Internal email event template value for OMS SFMC integration"
+        type: "string"
+        maxLength: 50
+      SentUTC:
+        description: "UTC Datetime value of when email was sent"
+        type: "string"
+        format: "date-time"
+      ToEmail:
+        description: "The email address of the recipient"
+        type: "string"
+        maxLength: 100
+      ToName:
+        description: "Name of recipient"
+        type: "string"
+        maxLength: 100
+      SentBy:
+        description: "Who or what that triggered the email. Usually a username or\
+          \ \"System\" for automatically triggered emails by OMS."
+        type: "string"
+        maxLength: 100
+      Success:
+        description: "Whether the email was sent successfully or not"
+        type: "boolean"
+  GradingStatus:
+    description: "GradingStatus Enum\nNone = 0,\nApprove = 1,\nDecline = 2,\nReview\
+      \ = 3\n"
+    type: "integer"
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+  NoteGroup:
+    description: "NoteGroup enum\nDefault = 1,\nReturns = 2,\nCustomerCare = 3,\n\
+      Shipping = 4\n"
+    type: "integer"
+    enum:
+    - 1
+    - 2
+    - 3
+    - 4
+  GiftCardType:
+    description: "Gift Card Type ID enum\nEGift = 1,\nPhysicalGift = 2\n"
+    type: "integer"
+    enum:
+    - 1
+    - 2
+  ExportOrderItemDeliveryType:
+    description: "DeliveryType enum\nWarehouseShip = 1,\nOmniPickup = 2,\nOmniShip\
+      \ = 3\n"
+    type: "integer"
+    enum:
+    - 1
+    - 2
+    - 3
+  AccessType:
+    description: "AccessType enum\nOrder = 1,\nPayment = 2\n"
+    type: "integer"
+    enum:
+    - 1
+    - 2
+  TaxTypes:
+    description: "TaxTypes enum\nUSSalesTotal = 1,\nUSShippingTotal = 2,\nVAT = 3,\n\
+      VATShipping = 4,\nGST = 5,\nGSTShipping = 6,\nPST = 7,\nPSTShipping = 8,\nHST\
+      \ = 9,\nHSTShipping = 10,\nGSTVAT = 11,\nGSTShippingVAT = 12,\nNet = 13,\nNetShipping\
+      \ = 14,\nQST = 15,\nQSTShipping = 16\n"
+    type: "integer"
+    enum:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    - 14
+    - 15
+    - 16
+  ExportAdjustmentType:
+    description: "ExportAdjustmentType enum\nItemDiscount = 1,\nOrderDiscount = 2,\n\
+      ShippingDiscount = 3,\nItemManualCredit = 4,\nItemManualCharge = 5,\nOrderManualCredit\
+      \ = 6,\nOrderManualCharge = 7,\nShippingManualCredit = 8,\nShippingManualCharge\
+      \ = 9,\nAdvancedCapture = 10,\nAdvancedCredit = 11,\nItemProratedDiscount =\
+      \ 12,\nReturnHandlingFee = 13,\nReturnCreditReversal = 14,\nReturnShippingFee\
+      \ = 15\n"
+    type: "integer"
+    enum:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    - 14
+    - 15
+  Error:
+    type: "object"
+    properties:
+      Description:
+        type: "string"
+      Details:
+        type: "string"
+x-ibm-configuration:
+  enforced: true
+  testable: true
+  phase: "specified"
+  cors:
+    enabled: true
+  catalogs:
+    Debug:
+      properties:
+        host-url: "https://cap-sg-prd-3.integration.ibmcloud.com:16606"
+        tls-profile: "stagingsecuregateway"
+        oauth-url: "https://sb-api.newbalance.com/oauthconf/v1/oauth2/token"
+    Sandbox:
+      properties:
+        host-url: "https://cap-sg-prd-3.integration.ibmcloud.com:16099"
+        tls-profile: "stagingsecuregateway"
+        oauth-url: "https://sb-api.newbalance.com/oauthconf/v1/oauth2/token"
+    Production:
+      properties:
+        host-url: "https://cap-sg-prd-2.integration.ibmcloud.com:16024"
+        tls-profile: "productionsecuregateway"
+        oauth-url: "https://api.newbalance.com/oauthconf/v1/oauth2/token"
+  properties:
+    oauth-url:
+      value: "$(catalog.host)"
+      description: ""
+      encoded: false
+    host-url:
+      value: "http://mock-api.newbalance.com"
+      description: "Environment specific host entry"
+      encoded: false
+    tls-profile:
+      value: ""
+      description: "TLS Profile for securing the host endpoint"
+      encoded: false
+  gateway: "datapower-gateway"
+  assembly:
+    execute:
+    - activity-log:
+        title: "activity-log"
+        content: "activity"
+        error-content: "payload"
+    - proxy:
+        title: "proxy"
+        timeout: 60
+        verb: "keep"
+        cache-response: "protocol"
+        cache-ttl: 900
+        description: "$(host-url)$(api.root)$(api.operation.path)$(request.search)\n\
+          https://cap-sg-prd-3.integration.ibmcloud.com:16606/w/fulfillment/request/v1/"
+        target-url: "$(host-url)$(request.path)$(request.search)"
+        tls-profile: "$(tls-profile)"
+    catch: []
